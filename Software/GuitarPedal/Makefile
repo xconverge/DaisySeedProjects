@@ -19,3 +19,7 @@ USE_DAISYSP_LGPL=1
 # Core location, and generic Makefile.
 SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
+
+# RT Neural lib
+C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen
+CPPFLAGS += -DRTNEURAL_DEFAULT_ALIGNMENT=8 -DRTNEURAL_NO_DEBUG=1
