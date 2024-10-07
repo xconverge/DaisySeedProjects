@@ -1,3 +1,5 @@
+#ifndef DSP_H
+#define DSP_H
 #pragma once
 
 #include <vector>
@@ -34,3 +36,5 @@ class History {
   // Copy the end of the history back to the front and reset mHistoryIndex
   void _RewindHistory();
 };
+
+#endif

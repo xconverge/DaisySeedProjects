@@ -1,3 +1,6 @@
+#ifndef IR_DATA_H
+#define IR_DATA_H
+#pragma once
 
 // IR Test Data
 
@@ -271,3 +274,5 @@ std::vector<float> ir_data3 = {
     0.023094479,    0.019726042,    0.019039115,    0.017455809};
 
 std::vector<std::vector<float>> ir_collection = {ir_data1, ir_data2, ir_data3};
+
+#endif

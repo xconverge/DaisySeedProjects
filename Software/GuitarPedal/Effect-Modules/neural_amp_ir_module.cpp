@@ -1,5 +1,11 @@
 #include "neural_amp_ir_module.h"
 
+// Model Weights (edit this file to add model weights trained with Colab script)
+//    The models must be GRU (gated recurrent unit) with hidden size = 9,
+//    snapshot models (not condidtioned on a parameter)
+#include "ImpulseResponse/ir_data.h"
+#include "NeuralModel/all_model_data_gru9_4count.h"
+
 using namespace bkshepherd;
 
 static const int s_paramCount = 2;
@@ -49,7 +55,7 @@ NeuralAmpIRModule::NeuralAmpIRModule() : BaseEffectModule() {
 
   // Setup IR
   int irIndex = 0;
-  m_IR.Init(ir_collection[irIndex]);  // ir_data is from ir_data.h
+  m_IR.Init(ir_collection[irIndex]);
 }
 
 // Destructor

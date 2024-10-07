@@ -1,3 +1,7 @@
+#ifndef IMPULSE_RESPONSE_H
+#define IMPULSE_RESPONSE_H
+#pragma once
+
 //
 //  ImpulseResponse.h
 //  NeuralAmpModeler-macOS
@@ -10,8 +14,6 @@
 //    Greatly simplified by assuming 1 channel, 1 input per Process call, and
 //    constant samplerate. For initial investigation into running IR's on the
 //    Daisy Seed
-
-#pragma once
 
 #include <Eigen/Dense>
 
@@ -40,3 +42,5 @@ class ImpulseResponse : public History {
   // The weights
   Eigen::VectorXf mWeight;
 };
+
+#endif

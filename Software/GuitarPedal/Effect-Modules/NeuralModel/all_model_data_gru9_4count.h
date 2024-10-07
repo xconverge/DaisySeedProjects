@@ -1,3 +1,7 @@
+#ifndef ALL_MODEL_DATA_GRU9_4COUNT_H
+#define ALL_MODEL_DATA_GRU9_4COUNT_H
+#pragma once
+
 #include <vector>
 
 struct modelData {
@@ -1259,3 +1263,5 @@ void setupWeights() {
   model_collection = {Model1, Model2, Model3, Model4,
                       Model5, Model6, Model7, Model8};
 }
+
+#endif

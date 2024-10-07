@@ -9,12 +9,6 @@
 #include "base_effect_module.h"
 #include "daisysp.h"
 
-// Model Weights (edit this file to add model weights trained with Colab script)
-//    The models must be GRU (gated recurrent unit) with hidden size = 9,
-//    snapshot models (not condidtioned on a parameter)
-#include "ImpulseResponse/ir_data.h"
-#include "NeuralModel/all_model_data_gru9_4count.h"
-
 #ifdef __cplusplus
 
 /** @file neural_amp_ir.h */
