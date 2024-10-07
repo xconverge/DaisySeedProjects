@@ -28,12 +28,15 @@ class NeuralAmpIRModule : public BaseEffectModule {
   float GetBrightnessForLED(int led_id) override;
 
  private:
-  void UpdateModelIndex();
-  void UpdateIRIndex();
+  void initializeModel();
+  void initializeIR();
 
   // Impulse Response
   ImpulseResponse m_IR;
-  int m_currentIRindex;
+  int m_currentIRIndex = 0;
+  int m_desiredIRIndex = 0;
+
+  int m_irEnabled = 0;
 
   // Neural Network Model
   // Currently only using snapshot models, they tend to sound better and
@@ -43,10 +46,10 @@ class NeuralAmpIRModule : public BaseEffectModule {
                    RTNeural::DenseT<float, 9, 1>>
       m_model;
 
-  int m_modelInSize;
-  unsigned int m_modelIndex;
+  unsigned int m_currentModelIndex = 0;
+  unsigned int m_desiredModelIndex = 0;
+
   float m_nnLevelAdjust = 1.0;
-  int m_indexMod;
 
   float m_driveMin;
   float m_driveMax;

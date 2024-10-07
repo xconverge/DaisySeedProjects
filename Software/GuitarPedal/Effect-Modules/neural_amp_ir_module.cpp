@@ -8,7 +8,11 @@
 
 using namespace bkshepherd;
 
-static const int s_paramCount = 3;
+static const char* s_irEnabledBinNames[2] = {"ON", "OFF"};
+static const char* s_modelBinNames[2] = {"1", "2"};
+static const char* s_IRBinNames[2] = {"IR1", "IR2"};
+
+static const int s_paramCount = 6;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "Level",
@@ -32,6 +36,33 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueBinCount : 0,
       defaultValue : 57,
       knobMapping : 2,
+      midiCCMapping : -1
+    },
+    {
+      name : "IR Enabled",
+      valueType : ParameterValueType::Binned,
+      valueBinCount : 2,
+      valueBinNames : s_irEnabledBinNames,
+      defaultValue : 0,
+      knobMapping : 3,
+      midiCCMapping : -1
+    },
+    {
+      name : "Model",
+      valueType : ParameterValueType::Binned,
+      valueBinCount : 2,
+      valueBinNames : s_modelBinNames,
+      defaultValue : 0,
+      knobMapping : 4,
+      midiCCMapping : -1
+    },
+    {
+      name : "IR #",
+      valueType : ParameterValueType::Binned,
+      valueBinCount : 2,
+      valueBinNames : s_IRBinNames,
+      defaultValue : 0,
+      knobMapping : 5,
       midiCCMapping : -1
     },
 };
@@ -60,6 +91,27 @@ NeuralAmpIRModule::~NeuralAmpIRModule() {
   // No Code Needed
 }
 
+void NeuralAmpIRModule::initializeModel() {
+  m_currentModelIndex = m_desiredModelIndex;
+
+  // Setup model
+  auto& gru = (m_model).template get<0>();
+  auto& dense = (m_model).template get<1>();
+  gru.setWVals(model_collection[m_currentModelIndex].rec_weight_ih_l0);
+  gru.setUVals(model_collection[m_currentModelIndex].rec_weight_hh_l0);
+  gru.setBVals(model_collection[m_currentModelIndex].rec_bias);
+  dense.setWeights(model_collection[m_currentModelIndex].lin_weight);
+  dense.setBias(model_collection[m_currentModelIndex].lin_bias.data());
+  m_model.reset();
+  m_nnLevelAdjust = model_collection[m_currentModelIndex].levelAdjust;
+}
+
+void NeuralAmpIRModule::initializeIR() {
+  m_currentIRIndex = m_desiredIRIndex;
+
+  m_IR.Init(ir_collection[m_currentIRIndex]);
+}
+
 void NeuralAmpIRModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
@@ -67,28 +119,30 @@ void NeuralAmpIRModule::Init(float sample_rate) {
 
   setupWeights();
 
-  int modelIndex = 0;
+  m_desiredModelIndex = 0;
+  initializeModel();
 
-  // Setup model
-  auto& gru = (m_model).template get<0>();
-  auto& dense = (m_model).template get<1>();
-  m_modelInSize = 1;
-  gru.setWVals(model_collection[modelIndex].rec_weight_ih_l0);
-  gru.setUVals(model_collection[modelIndex].rec_weight_hh_l0);
-  gru.setBVals(model_collection[modelIndex].rec_bias);
-  dense.setWeights(model_collection[modelIndex].lin_weight);
-  dense.setBias(model_collection[modelIndex].lin_bias.data());
-  m_model.reset();
-
-  m_nnLevelAdjust = model_collection[modelIndex].levelAdjust;
-
-  // Setup IR
-  int irIndex = 0;
-  m_IR.Init(ir_collection[irIndex]);
+  m_desiredIRIndex = 0;
+  initializeIR();
 }
 
 void NeuralAmpIRModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
+
+  // float drive =
+  //     m_driveMin + (GetParameterAsMagnitude(2) * (m_driveMax - m_driveMin));
+
+  m_irEnabled = GetParameterAsBinnedValue(3) - 1;
+
+  m_desiredModelIndex = GetParameterAsBinnedValue(4) - 1;
+  if (m_desiredModelIndex != m_currentModelIndex) {
+    initializeModel();
+  }
+
+  m_desiredIRIndex = GetParameterAsBinnedValue(5) - 1;
+  if (m_desiredIRIndex != m_currentIRIndex) {
+    initializeIR();
+  }
 
   // Neural Net Input
   float input_arr[1] = {0.0};
@@ -104,14 +158,17 @@ void NeuralAmpIRModule::ProcessMono(float in) {
       m_levelMin + (GetParameterAsMagnitude(0) * (m_levelMax - m_levelMin));
   float cutoff =
       m_cutoffMin + GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
-  // float drive =
-  //     m_driveMin + (GetParameterAsMagnitude(2) * (m_driveMax - m_driveMin));
 
   // Process Tone
   m_tone.SetFreq(cutoff);
 
   // Impulse Response
-  float impulse_out = m_IR.Process(ampOut) * 0.2;
+  float impulse_out = 0.0;
+  if (m_irEnabled == 0) {
+    impulse_out = m_IR.Process(ampOut) * 0.2;
+  } else {
+    impulse_out = ampOut;
+  }
 
   m_audioLeft = impulse_out * level;
   m_audioRight = impulse_out * level;
