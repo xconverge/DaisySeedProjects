@@ -45,8 +45,17 @@ class NeuralAmpIRModule : public BaseEffectModule {
 
   int m_modelInSize;
   unsigned int m_modelIndex;
-  float m_nnLevelAdjust;
+  float m_nnLevelAdjust = 1.0;
   int m_indexMod;
+
+  float m_driveMin;
+  float m_driveMax;
+  float m_levelMin;
+  float m_levelMax;
+  float m_cutoffMin;
+  float m_cutoffMax;
+
+  Tone m_tone;  // Low Pass
 };
 }  // namespace bkshepherd
 #endif

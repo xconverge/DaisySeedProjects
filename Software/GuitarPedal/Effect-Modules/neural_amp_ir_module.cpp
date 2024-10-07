@@ -8,27 +8,43 @@
 
 using namespace bkshepherd;
 
-static const int s_paramCount = 2;
+static const int s_paramCount = 3;
 static const ParameterMetaData s_metaData[s_paramCount] = {
-    {
-      name : "Drive",
-      valueType : ParameterValueType::FloatMagnitude,
-      valueBinCount : 0,
-      defaultValue : 57,
-      knobMapping : 1,
-      midiCCMapping : 1
-    },
     {
       name : "Level",
       valueType : ParameterValueType::FloatMagnitude,
       valueBinCount : 0,
       defaultValue : 40,
       knobMapping : 0,
-      midiCCMapping : 21
-    }};
+      midiCCMapping : -1
+    },
+    {
+      name : "Cutoff",
+      valueType : ParameterValueType::FloatMagnitude,
+      valueBinCount : 0,
+      defaultValue : 64,
+      knobMapping : 1,
+      midiCCMapping : -1
+    },
+    {
+      name : "Drive",
+      valueType : ParameterValueType::FloatMagnitude,
+      valueBinCount : 0,
+      defaultValue : 57,
+      knobMapping : 2,
+      midiCCMapping : -1
+    },
+};
 
 // Default Constructor
-NeuralAmpIRModule::NeuralAmpIRModule() : BaseEffectModule() {
+NeuralAmpIRModule::NeuralAmpIRModule()
+    : BaseEffectModule(),
+      m_driveMin(0.4f),
+      m_driveMax(0.8f),
+      m_levelMin(0.01f),
+      m_levelMax(0.20f),
+      m_cutoffMin(500),
+      m_cutoffMax(20000) {
   // Set the name of the effect
   m_name = "Neural";
 
@@ -37,6 +53,19 @@ NeuralAmpIRModule::NeuralAmpIRModule() : BaseEffectModule() {
 
   // Initialize Parameters for this Effect
   this->InitParams(s_paramCount);
+}
+
+// Destructor
+NeuralAmpIRModule::~NeuralAmpIRModule() {
+  // No Code Needed
+}
+
+void NeuralAmpIRModule::Init(float sample_rate) {
+  BaseEffectModule::Init(sample_rate);
+
+  m_tone.Init(sample_rate);
+
+  setupWeights();
 
   int modelIndex = 0;
 
@@ -58,15 +87,6 @@ NeuralAmpIRModule::NeuralAmpIRModule() : BaseEffectModule() {
   m_IR.Init(ir_collection[irIndex]);
 }
 
-// Destructor
-NeuralAmpIRModule::~NeuralAmpIRModule() {
-  // No Code Needed
-}
-
-void NeuralAmpIRModule::Init(float sample_rate) {
-  BaseEffectModule::Init(sample_rate);
-}
-
 void NeuralAmpIRModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
@@ -80,13 +100,21 @@ void NeuralAmpIRModule::ProcessMono(float in) {
   ampOut = m_model.forward(input_arr) + input_arr[0];
   ampOut *= m_nnLevelAdjust;
 
+  float level =
+      m_levelMin + (GetParameterAsMagnitude(0) * (m_levelMax - m_levelMin));
+  float cutoff =
+      m_cutoffMin + GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
+  // float drive =
+  //     m_driveMin + (GetParameterAsMagnitude(2) * (m_driveMax - m_driveMin));
+
   // Process Tone
+  m_tone.SetFreq(cutoff);
 
   // Impulse Response
   float impulse_out = m_IR.Process(ampOut) * 0.2;
 
-  m_audioLeft = impulse_out;
-  m_audioRight = impulse_out;
+  m_audioLeft = impulse_out * level;
+  m_audioRight = impulse_out * level;
 }
 
 void NeuralAmpIRModule::ProcessStereo(float inL, float inR) {
