@@ -33,10 +33,6 @@ class NeuralAmpIRModule : public BaseEffectModule {
   void SelectIR();
   void CalculateTone();
 
-  // Impulse Response
-  ImpulseResponse m_IR;
-  int m_currentIRIndex;
-
   // Neural Network Model
   // Currently only using snapshot models, they tend to sound better and
   //   we can use input level as gain.
@@ -44,14 +40,19 @@ class NeuralAmpIRModule : public BaseEffectModule {
                    RTNeural::DenseT<float, 9, 1>>
       m_model;
 
-  int m_currentModelIndex;
+  int m_currentModelIndex = -1;
+  float m_nnLevelAdjust;
 
-  float m_nnLevelAdjust = 1.0;
+  // Impulse Response
+  ImpulseResponse m_IR;
+  int m_currentIRIndex = -1;
 
   float m_gainMin;
   float m_gainMax;
+
   float m_levelMin;
   float m_levelMax;
+
   float m_cutoffMin;
   float m_cutoffMax;
 

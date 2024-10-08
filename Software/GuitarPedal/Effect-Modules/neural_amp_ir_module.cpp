@@ -1,9 +1,10 @@
 #include "neural_amp_ir_module.h"
 
+#include "ImpulseResponse/ir_data.h"
+
 // Model Weights (edit this file to add model weights trained with Colab script)
 //    The models must be GRU (gated recurrent unit) with hidden size = 9,
-//    snapshot models (not condidtioned on a parameter)
-#include "ImpulseResponse/ir_data.h"
+//    snapshot models (not conditioned on a parameter)
 #include "NeuralModel/all_model_data_gru9_4count.h"
 
 using namespace bkshepherd;
@@ -95,6 +96,29 @@ NeuralAmpIRModule::~NeuralAmpIRModule() {
   // No Code Needed
 }
 
+void NeuralAmpIRModule::Init(float sample_rate) {
+  BaseEffectModule::Init(sample_rate);
+
+  // in the model data .h file
+  setupWeights();
+
+  SelectModel();
+  SelectIR();
+
+  m_tone.Init(sample_rate);
+  CalculateTone();
+}
+
+void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
+  if (parameter_id == 3) {  // Change Model
+    SelectModel();
+  } else if (parameter_id == 1) {
+    CalculateTone();
+  } else if (parameter_id == 4) {  // Change IR
+    SelectIR();
+  }
+}
+
 void NeuralAmpIRModule::SelectModel() {
   const int modelIndex = GetParameterAsBinnedValue(3) - 1;
   if (m_currentModelIndex != modelIndex) {
@@ -125,28 +149,6 @@ void NeuralAmpIRModule::CalculateTone() {
                                          GetParameterAsMagnitude(1) *
                                          (m_cutoffMax - m_cutoffMin);
   m_tone.SetFreq(cutoff);
-}
-
-void NeuralAmpIRModule::Init(float sample_rate) {
-  BaseEffectModule::Init(sample_rate);
-
-  setupWeights();
-
-  SelectModel();
-  SelectIR();
-
-  m_tone.Init(sample_rate);
-  CalculateTone();
-}
-
-void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
-  if (parameter_id == 3) {  // Change Model
-    SelectModel();
-  } else if (parameter_id == 1) {
-    CalculateTone();
-  } else if (parameter_id == 4) {  // Change IR
-    SelectIR();
-  }
 }
 
 void NeuralAmpIRModule::ProcessMono(float in) {
@@ -193,6 +195,11 @@ void NeuralAmpIRModule::ProcessMono(float in) {
 void NeuralAmpIRModule::ProcessStereo(float inL, float inR) {
   // Calculate the mono effect
   ProcessMono(inL);
+
+  // NOTE: Running the Neural Nets in stereo is currently not feasible due to
+  // processing limitations, this will remain a MONO ONLY effect for now.
+  //       The left channel output is copied to the right output, but the right
+  //       input is ignored in this effect module.
 }
 
 float NeuralAmpIRModule::GetBrightnessForLED(int led_id) {
