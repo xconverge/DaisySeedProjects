@@ -97,18 +97,16 @@ NeuralAmpIRModule::~NeuralAmpIRModule() {
 
 void NeuralAmpIRModule::SelectModel() {
   const int modelIndex = GetParameterAsBinnedValue(3) - 1;
-
   if (m_currentModelIndex != modelIndex) {
-    // Setup model
     auto& gru = (m_model).template get<0>();
     auto& dense = (m_model).template get<1>();
-    gru.setWVals(model_collection[m_currentModelIndex].rec_weight_ih_l0);
-    gru.setUVals(model_collection[m_currentModelIndex].rec_weight_hh_l0);
-    gru.setBVals(model_collection[m_currentModelIndex].rec_bias);
-    dense.setWeights(model_collection[m_currentModelIndex].lin_weight);
-    dense.setBias(model_collection[m_currentModelIndex].lin_bias.data());
+    gru.setWVals(model_collection[modelIndex].rec_weight_ih_l0);
+    gru.setUVals(model_collection[modelIndex].rec_weight_hh_l0);
+    gru.setBVals(model_collection[modelIndex].rec_bias);
+    dense.setWeights(model_collection[modelIndex].lin_weight);
+    dense.setBias(model_collection[modelIndex].lin_bias.data());
     m_model.reset();
-    m_nnLevelAdjust = model_collection[m_currentModelIndex].levelAdjust;
+    m_nnLevelAdjust = model_collection[modelIndex].levelAdjust;
   }
   m_currentModelIndex = modelIndex;
 }
@@ -116,14 +114,16 @@ void NeuralAmpIRModule::SelectModel() {
 void NeuralAmpIRModule::SelectIR() {
   const int irIndex = GetParameterAsBinnedValue(4) - 1;
   if (irIndex != m_currentIRIndex) {
-    m_IR.Init(ir_collection[m_currentIRIndex]);
+    m_IR.Init(ir_collection[irIndex]);
   }
   m_currentIRIndex = irIndex;
 }
 
 void NeuralAmpIRModule::CalculateTone() {
-  const float cutoff =
-      m_cutoffMin + GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
+  // Set low pass filter as exponential taper
+  const float cutoff = m_cutoffMin + GetParameterAsMagnitude(1) *
+                                         GetParameterAsMagnitude(1) *
+                                         (m_cutoffMax - m_cutoffMin);
   m_tone.SetFreq(cutoff);
 }
 
@@ -156,7 +156,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
   float input_arr[1] = {0.0};
 
   // Apply gain
-  float gain =
+  const float gain =
       m_gainMin + (GetParameterAsMagnitude(2) * (m_gainMax - m_gainMin));
   input_arr[0] = m_audioLeft * gain;
 
