@@ -140,11 +140,11 @@ void NeuralAmpIRModule::Init(float sample_rate) {
 }
 
 void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
-  if (parameter_id == 4) {  // Change Model
+  if (parameter_id == 3) {  // Change Model
     SelectModel();
   } else if (parameter_id == 1) {
     CalculateTone();
-  } else if (parameter_id == 5) {  // Change IR
+  } else if (parameter_id == 4) {  // Change IR
     SelectIR();
   }
 }
