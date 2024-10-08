@@ -8,9 +8,10 @@
 
 using namespace bkshepherd;
 
-static const char* s_irEnabledBinNames[2] = {"ON", "OFF"};
-static const char* s_modelBinNames[2] = {"1", "2"};
-static const char* s_IRBinNames[2] = {"IR1", "IR2"};
+static const char* s_irEnabledBinNames[2] = {"OFF", "ON"};
+static const char* s_modelBinNames[8] = {"1", "2", "3", "4",
+                                         "5", "6", "7", "8"};
+static const char* s_IRBinNames[3] = {"IR1", "IR2", "IR3"};
 
 static const int s_paramCount = 6;
 static const ParameterMetaData s_metaData[s_paramCount] = {
@@ -50,7 +51,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "Model",
       valueType : ParameterValueType::Binned,
-      valueBinCount : 2,
+      valueBinCount : 8,
       valueBinNames : s_modelBinNames,
       defaultValue : 0,
       knobMapping : 4,
@@ -59,7 +60,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "IR #",
       valueType : ParameterValueType::Binned,
-      valueBinCount : 2,
+      valueBinCount : 3,
       valueBinNames : s_IRBinNames,
       defaultValue : 0,
       knobMapping : 5,
@@ -70,8 +71,8 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 // Default Constructor
 NeuralAmpIRModule::NeuralAmpIRModule()
     : BaseEffectModule(),
-      m_driveMin(0.4f),
-      m_driveMax(0.8f),
+      m_driveMin(0.0f),
+      m_driveMax(1.0f),
       m_levelMin(0.01f),
       m_levelMax(0.20f),
       m_cutoffMin(500),
@@ -129,9 +130,6 @@ void NeuralAmpIRModule::Init(float sample_rate) {
 void NeuralAmpIRModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
-  // float drive =
-  //     m_driveMin + (GetParameterAsMagnitude(2) * (m_driveMax - m_driveMin));
-
   m_irEnabled = GetParameterAsBinnedValue(3) - 1;
 
   m_desiredModelIndex = GetParameterAsBinnedValue(4) - 1;
@@ -147,10 +145,14 @@ void NeuralAmpIRModule::ProcessMono(float in) {
   // Neural Net Input
   float input_arr[1] = {0.0};
 
-  input_arr[0] = in;
+  // Apply gain
+  float drive =
+      m_driveMin + (GetParameterAsMagnitude(2) * (m_driveMax - m_driveMin));
+  input_arr[0] = in * drive;
 
   // Process Neural Net Model
   float ampOut = 0.0;
+
   ampOut = m_model.forward(input_arr) + input_arr[0];
   ampOut *= m_nnLevelAdjust;
 
@@ -164,7 +166,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
 
   // Impulse Response
   float impulse_out = 0.0;
-  if (m_irEnabled == 0) {
+  if (m_irEnabled == 1) {
     impulse_out = m_IR.Process(ampOut) * 0.2;
   } else {
     impulse_out = ampOut;
