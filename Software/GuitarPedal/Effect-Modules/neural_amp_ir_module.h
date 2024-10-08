@@ -23,36 +23,33 @@ class NeuralAmpIRModule : public BaseEffectModule {
   ~NeuralAmpIRModule();
 
   void Init(float sample_rate) override;
+  void ParameterChanged(int parameter_id) override;
   void ProcessMono(float in) override;
   void ProcessStereo(float inL, float inR) override;
   float GetBrightnessForLED(int led_id) override;
 
  private:
-  void initializeModel();
-  void initializeIR();
+  void SelectModel();
+  void SelectIR();
+  void CalculateTone();
 
   // Impulse Response
   ImpulseResponse m_IR;
-  int m_currentIRIndex = 0;
-  int m_desiredIRIndex = 0;
-
-  int m_irEnabled = 0;
+  int m_currentIRIndex;
 
   // Neural Network Model
   // Currently only using snapshot models, they tend to sound better and
   //   we can use input level as gain.
-
   RTNeural::ModelT<float, 1, 1, RTNeural::GRULayerT<float, 1, 9>,
                    RTNeural::DenseT<float, 9, 1>>
       m_model;
 
-  unsigned int m_currentModelIndex = 0;
-  unsigned int m_desiredModelIndex = 0;
+  int m_currentModelIndex;
 
   float m_nnLevelAdjust = 1.0;
 
-  float m_driveMin;
-  float m_driveMax;
+  float m_gainMin;
+  float m_gainMax;
   float m_levelMin;
   float m_levelMax;
   float m_cutoffMin;
