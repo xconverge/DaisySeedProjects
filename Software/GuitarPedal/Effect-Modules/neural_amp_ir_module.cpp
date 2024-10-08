@@ -49,16 +49,16 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueBinCount : 8,
       valueBinNames : s_modelBinNames,
       defaultValue : 0,
-      knobMapping : 4,
+      knobMapping : 3,
       midiCCMapping : -1
     },
     {
-      name : "IR #",
+      name : "IR",
       valueType : ParameterValueType::Binned,
       valueBinCount : 10,
       valueBinNames : s_IRBinNames,
       defaultValue : 0,
-      knobMapping : 5,
+      knobMapping : 4,
       midiCCMapping : -1
     },
     {
@@ -66,7 +66,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueType : ParameterValueType::Bool,
       valueBinCount : 0,
       defaultValue : 127,
-      knobMapping : 3,
+      knobMapping : 5,
       midiCCMapping : -1
     },
 };
@@ -76,7 +76,7 @@ NeuralAmpIRModule::NeuralAmpIRModule()
     : BaseEffectModule(),
       m_gainMin(0.0f),
       m_gainMax(2.0f),
-      m_levelMin(2.0f),
+      m_levelMin(0.0f),
       m_levelMax(1.0f),
       m_cutoffMin(500),
       m_cutoffMax(20000) {
