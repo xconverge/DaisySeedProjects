@@ -3,6 +3,7 @@
 #include "Effect-Modules/autopan_module.h"
 #include "Effect-Modules/chopper_module.h"
 #include "Effect-Modules/chorus_module.h"
+#include "Effect-Modules/looper_module.h"
 #include "Effect-Modules/metro_module.h"
 #include "Effect-Modules/modulated_tremolo_module.h"
 #include "Effect-Modules/multi_delay_module.h"
@@ -442,7 +443,7 @@ int main(void) {
       hardware.GetNumberOfSamplesForTime(crossFaderTransitionTimeInSeconds);
 
   // Init the Effects Modules
-  availableEffectsCount = 9;
+  availableEffectsCount = 10;
   availableEffects = new BaseEffectModule *[availableEffectsCount];
   availableEffects[0] = new ModulatedTremoloModule();
   availableEffects[1] = new OverdriveModule();
@@ -453,6 +454,7 @@ int main(void) {
   availableEffects[6] = new MultiDelayModule();
   availableEffects[7] = new MetroModule();
   availableEffects[8] = new NeuralAmpIRModule();
+  availableEffects[9] = new LooperModule();
 
   for (int i = 0; i < availableEffectsCount; i++) {
     availableEffects[i]->Init(sample_rate);
