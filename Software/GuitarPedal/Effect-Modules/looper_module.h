@@ -25,6 +25,9 @@ class LooperModule : public BaseEffectModule {
   float GetBrightnessForLED(int led_id) override;
   void AlternateFootswitchPressed() override;
   void AlternateFootswitchHeld() override;
+  void DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
+              int numItemsTotal, Rectangle boundsToDrawIn,
+              bool isEditing) override;
 
  private:
   // Loopers and the buffers they'll use

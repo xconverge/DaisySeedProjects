@@ -4,6 +4,8 @@
 
 using namespace bkshepherd;
 
+const uint16_t k_screenWidth = 128;
+
 // 60 seconds at 48kHz
 #define kBuffSize 48000 * 60
 
@@ -120,4 +122,27 @@ float LooperModule::GetBrightnessForLED(int led_id) {
   }
 
   return value;
+}
+
+void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
+                          int numItemsTotal, Rectangle boundsToDrawIn,
+                          bool isEditing) {
+  BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn,
+                           isEditing);
+  uint16_t center = boundsToDrawIn.GetHeight() / 2;
+
+  char strbuff[64];
+  if (m_looperL.IsNearBeginning()) {
+    sprintf(strbuff, "..START..");
+  } else {
+    if (m_looperL.Recording()) {
+      sprintf(strbuff, "..REC..");
+    } else {
+      sprintf(strbuff, ".......");
+    }
+  }
+
+  boundsToDrawIn.RemoveFromTop(center);
+  display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
+                             Alignment::centered, true);
 }
