@@ -25,6 +25,10 @@ class TunerModule : public BaseEffectModule {
   void DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
               int numItemsTotal, Rectangle boundsToDrawIn,
               bool isEditing) override;
+
+ private:
+  float m_currentFrequency;
+  float m_cachedSampleRate;
 };
 }  // namespace bkshepherd
 #endif
