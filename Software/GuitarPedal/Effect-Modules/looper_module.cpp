@@ -10,10 +10,33 @@ using namespace bkshepherd;
 float DSY_SDRAM_BSS bufferL[kBuffSize];
 float DSY_SDRAM_BSS bufferR[kBuffSize];
 
-static const ParameterMetaData s_metaData[0] = {};
+static const int s_paramCount = 2;
+static const ParameterMetaData s_metaData[s_paramCount] = {
+    {
+      name : "Input Level",
+      valueType : ParameterValueType::FloatMagnitude,
+      valueBinCount : 0,
+      defaultValue : 64,
+      knobMapping : 0,
+      midiCCMapping : -1
+    },
+    {
+      name : "Loop Level",
+      valueType : ParameterValueType::FloatMagnitude,
+      valueBinCount : 0,
+      defaultValue : 64,
+      knobMapping : 1,
+      midiCCMapping : -1
+    },
+};
 
 // Default Constructor
-LooperModule::LooperModule() : BaseEffectModule() {
+LooperModule::LooperModule()
+    : BaseEffectModule(),
+      m_inputLevelMin(0.0f),
+      m_inputLevelMax(1.0f),
+      m_loopLevelMin(0.0f),
+      m_loopLevelMax(1.0f) {
   // Set the name of the effect
   m_name = "Looper";
 
@@ -52,13 +75,17 @@ void LooperModule::AlternateFootswitchHeld() {
 void LooperModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
-  const float gain = 1.0f;
-  const float levelLoop = 1.0f;
+  const float inputLevel =
+      m_inputLevelMin +
+      (GetParameterAsMagnitude(0) * (m_inputLevelMax - m_inputLevelMin));
 
-  float input = in * gain;
+  const float loopLevel = m_loopLevelMin + (GetParameterAsMagnitude(1) *
+                                            (m_loopLevelMax - m_loopLevelMin));
+
+  float input = in * inputLevel;
 
   // store signal = loop signal * loop gain + in * in_gain
-  float looperOutput = m_looperL.Process(input) * levelLoop + input;
+  float looperOutput = m_looperL.Process(input) * loopLevel + input;
 
   m_audioRight = m_audioLeft = looperOutput;
 }
@@ -66,15 +93,19 @@ void LooperModule::ProcessMono(float in) {
 void LooperModule::ProcessStereo(float inL, float inR) {
   BaseEffectModule::ProcessStereo(inL, inR);
 
-  const float gain = 1.0f;
-  const float levelLoop = 1.0f;
+  const float inputLevel =
+      m_inputLevelMin +
+      (GetParameterAsMagnitude(0) * (m_inputLevelMax - m_inputLevelMin));
 
-  float inputL = inL * gain;
-  float inputR = inR * gain;
+  const float loopLevel = m_loopLevelMin + (GetParameterAsMagnitude(1) *
+                                            (m_loopLevelMax - m_loopLevelMin));
+
+  float inputL = inL * inputLevel;
+  float inputR = inR * inputLevel;
 
   // store signal = loop signal * loop gain + in * in_gain
-  float looperOutputL = m_looperL.Process(inputL) * levelLoop + inputL;
-  float looperOutputR = m_looperR.Process(inputR) * levelLoop + inputR;
+  float looperOutputL = m_looperL.Process(inputL) * loopLevel + inputL;
+  float looperOutputR = m_looperR.Process(inputR) * loopLevel + inputR;
 
   m_audioLeft = looperOutputL;
   m_audioRight = looperOutputR;

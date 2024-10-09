@@ -30,6 +30,11 @@ class LooperModule : public BaseEffectModule {
   // Loopers and the buffers they'll use
   Looper m_looperL;
   Looper m_looperR;
+
+  float m_inputLevelMin;
+  float m_inputLevelMax;
+  float m_loopLevelMin;
+  float m_loopLevelMax;
 };
 }  // namespace bkshepherd
 #endif
