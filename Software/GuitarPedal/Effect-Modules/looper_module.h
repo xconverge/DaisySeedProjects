@@ -14,8 +14,6 @@ using namespace daisysp;
 
 namespace bkshepherd {
 
-const uint16_t ScreenWidth = 128;
-
 class LooperModule : public BaseEffectModule {
  public:
   LooperModule();
@@ -24,8 +22,14 @@ class LooperModule : public BaseEffectModule {
   void Init(float sample_rate) override;
   void ProcessMono(float in) override;
   void ProcessStereo(float inL, float inR) override;
+  float GetBrightnessForLED(int led_id) override;
+  void AlternateFootswitchPressed() override;
+  void AlternateFootswitchHeld() override;
 
  private:
+  // Loopers and the buffers they'll use
+  Looper m_looperL;
+  Looper m_looperR;
 };
 }  // namespace bkshepherd
 #endif
