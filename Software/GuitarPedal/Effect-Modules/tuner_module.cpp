@@ -2,6 +2,18 @@
 #include "tuner_module.h"
 
 #include "../Util/audio_utilities.h"
+#include "arm_const_structs.h"
+#include "arm_math.h"
+
+// Using FFT size of 2048 needs 16K of sample buffer, and only gets a resolution
+// of 47Hz.
+#define FFT_SIZE 2048
+#define FFT_BUF_SIZE (2 * FFT_SIZE)
+float fft_buf[FFT_BUF_SIZE];
+float output[FFT_SIZE];
+
+// global, so do_fft() knows when to run
+int fft_buf_index = 0;
 
 using namespace bkshepherd;
 
@@ -34,8 +46,6 @@ void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
   m_cachedSampleRate = sample_rate;
-
-  m_frequencyDetector.Init(sample_rate);
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -50,15 +60,55 @@ uint8_t Note(float frequency) {
 
 uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 
+float do_fft(float *input, float *output, float sampleRate) {
+  float32_t maxValue;
+  uint32_t index = 0;
+
+  int Fmax = sampleRate / 2;  // 24000
+  uint32_t Nbins = FFT_SIZE / 2;
+
+  /* Process the data through the CFFT/CIFFT module */
+  /* this must match FFT_SIZE, and 2048 is as high as Daisy can fit */
+  arm_cfft_f32(&arm_cfft_sR_f32_len2048, input, 0 /*ifftFlag*/,
+               1 /*doBitReverse*/);
+
+  /* Process the data through the Complex Magnitude Module for
+  calculating the magnitude at each bin */
+  arm_cmplx_mag_f32(input, output, FFT_SIZE /*fftSize*/);
+
+  /* Calculates maxValue and returns corresponding BIN value */
+  arm_max_f32(output, FFT_SIZE /*fftSize*/, &maxValue, &index);
+
+  /*
+      to calculate the freq of the selected bin
+      N (Bins) = FFT Size/2
+      FR = Fmax/N(Bins)
+  */
+
+  // error test
+  if (index >= Nbins) return -1.f;
+
+  // good result
+  return (float)index * ((float)Fmax / Nbins);
+}
+
 void TunerModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
-  m_frequencyDetector.Process(in);
-  float period = m_frequencyDetector.GetPeakPeakInterval();
-  float frequency = 1 / period;
+  if (fft_buf_index < FFT_BUF_SIZE) {
+    fft_buf[fft_buf_index++] = in;
+    fft_buf[fft_buf_index++] = 0.f;
+  }
 
-  if (frequency && round(m_currentFrequency) != frequency) {
-    m_currentFrequency = frequency;
+  if (fft_buf_index == FFT_BUF_SIZE) {
+    // do FFT
+    float frequency = do_fft(fft_buf, output, m_cachedSampleRate);
+    // start collecting samples again
+    fft_buf_index = 0;
+
+    if (frequency && round(m_currentFrequency) != frequency) {
+      m_currentFrequency = frequency;
+    }
   }
 
   m_audioRight = m_audioLeft = in;
@@ -66,7 +116,7 @@ void TunerModule::ProcessMono(float in) {
 
 void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
 
-void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
+void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
                          int numItemsTotal, Rectangle boundsToDrawIn,
                          bool isEditing) {
   BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn,

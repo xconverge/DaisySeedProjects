@@ -4,7 +4,6 @@
 
 #include <stdint.h>
 
-#include "../Util/frequency_detector.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
@@ -30,8 +29,6 @@ class TunerModule : public BaseEffectModule {
  private:
   float m_currentFrequency;
   float m_cachedSampleRate;
-
-  FrequencyDetector m_frequencyDetector;
 };
 }  // namespace bkshepherd
 #endif
