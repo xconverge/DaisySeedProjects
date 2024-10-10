@@ -34,65 +34,10 @@ void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
   m_cachedSampleRate = sample_rate;
+
+  m_frequencyDetector.Init(sample_rate);
 }
 
-float Autocorrelate(float* in, size_t size, float sampleRate) {
-  float rms = 0.0f;
-
-  for (size_t i = 0; i < size; ++i) rms += in[i] * in[i];
-
-  rms = sqrt(rms / size);
-
-  if (rms < 0.01f) return 0.0f;
-
-  bool found = false;
-
-  size_t index = 0;
-  size_t new_size = size - 1;
-
-  for (size_t i = 0; i < size / 2; ++i) {
-    if (fabs(in[i]) < 0.2f) {
-      found = true;
-      index = i;
-    }
-
-    if (i + 1 < size && fabs(in[size - i + 1]) < 0.2f) {
-      found = true;
-      new_size = size - i;
-    }
-
-    if (found) break;
-  }
-
-  in = &in[index];
-  size = new_size;
-
-  float diffs[size] = {0.0f};
-
-  for (size_t i = 0; i < size; ++i) {
-    for (size_t j = 0; j < size - i; ++j)
-      diffs[i] = diffs[i] + in[j] * in[j + i];
-  }
-
-  index = 0;
-
-  while (index < size && diffs[index] > diffs[index + 1]) index++;
-
-  float max = -1.0f;
-
-  for (size_t i = index; i < size; ++i) {
-    if (diffs[i] > max) {
-      max = diffs[i];
-      index = i;
-    }
-  }
-
-  float val =
-      (diffs[index - 1] + diffs[index + 1] - 2.0f * diffs[index]) / 2.0f;
-  return sampleRate / (val ? index - (diffs[index + 1] - diffs[index - 1]) /
-                                         2.0f / (2.0f * val)
-                           : index);
-}
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
 
 int16_t Cents(float frequency, uint8_t note) {
@@ -108,9 +53,9 @@ uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 void TunerModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
-  // TODO SK: is this ok?
-  float frequency =
-      round(Autocorrelate(&in, sizeof(in) / sizeof(float), m_cachedSampleRate));
+  m_frequencyDetector.Process(in);
+  float period = m_frequencyDetector.GetPeakPeakInterval();
+  float frequency = 1 / period;
 
   if (frequency && round(m_currentFrequency) != frequency) {
     m_currentFrequency = frequency;
