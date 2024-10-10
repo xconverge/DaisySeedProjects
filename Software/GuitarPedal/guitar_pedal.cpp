@@ -10,7 +10,6 @@
 #include "Effect-Modules/neural_amp_ir_module.h"
 #include "Effect-Modules/overdrive_module.h"
 #include "Effect-Modules/reverb_module.h"
-#include "Effect-Modules/tuner_module.h"
 #include "Hardware-Modules/guitar_pedal_125b.h"
 #include "UI/guitar_pedal_ui.h"
 #include "Util/audio_utilities.h"
@@ -455,7 +454,7 @@ int main(void) {
       hardware.GetNumberOfSamplesForTime(crossFaderTransitionTimeInSeconds);
 
   // Init the Effects Modules
-  availableEffectsCount = 11;
+  availableEffectsCount = 10;
   availableEffects = new BaseEffectModule *[availableEffectsCount];
   availableEffects[0] = new ModulatedTremoloModule();
   availableEffects[1] = new OverdriveModule();
@@ -467,7 +466,6 @@ int main(void) {
   availableEffects[7] = new MetroModule();
   availableEffects[8] = new NeuralAmpIRModule();
   availableEffects[9] = new LooperModule();
-  availableEffects[10] = new TunerModule();
 
   for (int i = 0; i < availableEffectsCount; i++) {
     availableEffects[i]->Init(sample_rate);
