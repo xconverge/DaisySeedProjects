@@ -1,7 +1,5 @@
 #include "frequency_detector.h"
 
-#include <optional>
-
 #include "arm_const_structs.h"
 #include "arm_math.h"
 

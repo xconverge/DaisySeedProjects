@@ -5,9 +5,12 @@
 #include <stdint.h>
 
 #include "../Util/frequency_detector.h"
+#include "../Util/frequency_detector_alt.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
+
+#define USE_ALT_FREQ_DETECTOR
 
 /** @file tuner_module.h */
 
@@ -29,7 +32,11 @@ class TunerModule : public BaseEffectModule {
 
  private:
   float m_currentFrequency;
+#ifdef USE_ALT_FREQ_DETECTOR
+  FrequencyDetectorAlt m_frequencyDetector;
+#else
   FrequencyDetector m_frequencyDetector;
+#endif
 };
 }  // namespace bkshepherd
 #endif

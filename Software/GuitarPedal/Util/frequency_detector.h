@@ -1,7 +1,6 @@
 #pragma once
 #ifndef FREQUENCY_DETECTOR_H
 #define FREQUENCY_DETECTOR_H
-#include <optional>
 
 class FrequencyDetector {
  public:
