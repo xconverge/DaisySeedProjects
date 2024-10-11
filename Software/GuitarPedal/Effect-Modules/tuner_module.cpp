@@ -31,9 +31,12 @@ const size_t buffsize = 2 * laps * N;
 // buffers for STFT processing
 // audio --> in --(fft)--> middle --(process)--> out --(ifft)--> in -->
 // each of these is a few circular buffers stacked end-to-end.
-S in[buffsize];  // buffers for input and output (from / to user audio callback)
-S middle[buffsize];  // buffers for unprocessed frequency domain data
-S out[buffsize];     // buffers for processed frequency domain data
+// buffers for input and output (from / to user // audio callback)
+S DSY_SDRAM_BSS in[buffsize];
+// buffers for unprocessed frequency domain data
+S DSY_SDRAM_BSS middle[buffsize];
+// buffers for processed frequency domain data
+S DSY_SDRAM_BSS out[buffsize];
 
 ShyFFT<S, N, RotationPhasor>* fft;  // fft object
 Fourier<S, N>* stft;                // stft object
