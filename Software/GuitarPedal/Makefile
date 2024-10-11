@@ -23,3 +23,31 @@ include $(SYSTEM_FILES_DIR)/Makefile
 # RT Neural lib
 C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen 
 CPPFLAGS += -DRTNEURAL_DEFAULT_ALIGNMENT=8 -DRTNEURAL_NO_DEBUG=1
+
+
+
+# CMSIS START --------------------------------------------------
+
+# To get CMSIS working:
+# 1. I copied all lines in this section to the libDaisy Makefile
+# 2. I built libDaisy again
+# 3. I then copied the .o files from libDaisy/build/Drivers/CMSIS-DSP/Source folders to the ./build folder of this project
+CMSIS_DSP = $(LIBDAISY_DIR)/Drivers/CMSIS-DSP
+
+C_INCLUDES += -I$(CMSIS_DSP)/PrivateInclude -I$(CMSIS_DSP)/Include
+
+ASM_SOURCES += \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_bitreversal2.s
+
+C_SOURCES += \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_rfft_fast_f32.c \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_rfft_fast_init_f32.c \
+$(CMSIS_DSP)/Source/CommonTables/arm_common_tables.c \
+$(CMSIS_DSP)/Source/CommonTables/arm_const_structs.c \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_cfft_f32.c \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_bitreversal.c \
+$(CMSIS_DSP)/Source/StatisticsFunctions/arm_max_f32.c \
+$(CMSIS_DSP)/Source/ComplexMathFunctions/arm_cmplx_mag_f32.c \
+$(CMSIS_DSP)/Source/TransformFunctions/arm_cfft_radix8_f32.c
+
+# CMSIS END --------------------------------------------------

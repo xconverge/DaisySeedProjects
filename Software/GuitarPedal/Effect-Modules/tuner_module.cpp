@@ -51,11 +51,11 @@ uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 void TunerModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
-  const float frequency = m_frequencyDetector.Process(in);
+  // Run the detector
+  m_frequencyDetector.Process(in);
 
-  if (frequency && round(m_currentFrequency) != frequency) {
-    m_currentFrequency = frequency;
-  }
+  // Try to get the latest frequency from the detector
+  m_currentFrequency = round(m_frequencyDetector.GetFrequency());
 
   m_audioRight = m_audioLeft = in;
 }
