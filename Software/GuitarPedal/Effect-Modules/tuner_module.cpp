@@ -1,6 +1,5 @@
 #include "tuner_module.h"
 
-#include "../Util/audio_utilities.h"
 #include "../Util/frequency_detector_cmsis.h"
 #include "../Util/frequency_detector_q.h"
 #include "../Util/frequency_detector_yin.h"
