@@ -6,11 +6,13 @@
 
 #include "../Util/frequency_detector.h"
 #include "../Util/frequency_detector_alt.h"
+#include "../Util/frequency_detector_q.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
 
-#define USE_ALT_FREQ_DETECTOR
+// #define USE_ALT_FREQ_DETECTOR
+#define USE_Q_FREQ_DETECTOR
 
 /** @file tuner_module.h */
 
@@ -32,8 +34,10 @@ class TunerModule : public BaseEffectModule {
 
  private:
   float m_currentFrequency;
-#ifdef USE_ALT_FREQ_DETECTOR
+#if defined(USE_ALT_FREQ_DETECTOR)
   FrequencyDetectorAlt m_frequencyDetector;
+#elif defined(USE_Q_FREQ_DETECTOR)
+  FrequencyDetectorQ m_frequencyDetector;
 #else
   FrequencyDetector m_frequencyDetector;
 #endif
