@@ -106,7 +106,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
       sprintf(strbuff, "    %s o  ", currentNote);
     }
   } else {
-    sprintf(strbuff, "    %s    ", currentNote);
+    sprintf(strbuff, "   [%s]   ", currentNote);
   }
 
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
