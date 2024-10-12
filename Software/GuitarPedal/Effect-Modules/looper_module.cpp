@@ -142,7 +142,6 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
     }
   }
 
-  boundsToDrawIn.RemoveFromTop(center);
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
                              Alignment::centered, true);
 }

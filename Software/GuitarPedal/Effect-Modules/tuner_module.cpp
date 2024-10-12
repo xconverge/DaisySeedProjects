@@ -92,7 +92,11 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
     sprintf(strbuff, "    %s    ", currentNote);
   }
 
-  boundsToDrawIn.RemoveFromTop(center);
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
                              Alignment::centered, true);
+
+  char strbuffFreq[64];
+  sprintf(strbuffFreq, "%.2f", m_currentFrequency);
+  display.WriteStringAligned(strbuffFreq, Font_11x18, boundsToDrawIn,
+                             Alignment::bottomCentered, true);
 }
