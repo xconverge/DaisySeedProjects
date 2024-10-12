@@ -15,7 +15,7 @@ frequency highest_frequency = frequency(523.251f);
 // The pitch detector
 pitch_detector pd{lowest_frequency, highest_frequency, sample_rate, -40_dB};
 
-FrequencyDetectorQ::FrequencyDetectorQ() {
+FrequencyDetectorQ::FrequencyDetectorQ() : FrequencyDetectorInterface() {
   //
 }
 

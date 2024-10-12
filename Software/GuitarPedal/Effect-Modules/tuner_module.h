@@ -4,15 +4,10 @@
 
 #include <stdint.h>
 
-#include "../Util/frequency_detector.h"
-#include "../Util/frequency_detector_alt.h"
-#include "../Util/frequency_detector_q.h"
+#include "../Util/frequency_detector_interface.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
-
-// #define USE_ALT_FREQ_DETECTOR
-#define USE_Q_FREQ_DETECTOR
 
 /** @file tuner_module.h */
 
@@ -22,25 +17,21 @@ namespace bkshepherd {
 
 class TunerModule : public BaseEffectModule {
  public:
-  TunerModule();
+  enum class TunerVariant { Q, CMSIS_FFT, YIN };
+  TunerModule(TunerVariant variant);
   ~TunerModule();
 
   void Init(float sample_rate) override;
   void ProcessMono(float in) override;
   void ProcessStereo(float inL, float inR) override;
-  void DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
+  void DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
               int numItemsTotal, Rectangle boundsToDrawIn,
               bool isEditing) override;
 
  private:
   float m_currentFrequency;
-#if defined(USE_ALT_FREQ_DETECTOR)
-  FrequencyDetectorAlt m_frequencyDetector;
-#elif defined(USE_Q_FREQ_DETECTOR)
-  FrequencyDetectorQ m_frequencyDetector;
-#else
-  FrequencyDetector m_frequencyDetector;
-#endif
+
+  FrequencyDetectorInterface* m_frequencyDetector = nullptr;
 };
 }  // namespace bkshepherd
 #endif

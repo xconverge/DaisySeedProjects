@@ -1,4 +1,4 @@
-#include "frequency_detector.h"
+#include "frequency_detector_cmsis.h"
 
 #include "arm_const_structs.h"
 #include "arm_math.h"
@@ -8,15 +8,16 @@
 float fft_buf[FFT_BUF_SIZE];
 float output[FFT_SIZE];
 
-FrequencyDetector::FrequencyDetector() {
+FrequencyDetectorCMSIS::FrequencyDetectorCMSIS()
+    : FrequencyDetectorInterface() {
   //
 }
 
-FrequencyDetector::~FrequencyDetector() {
+FrequencyDetectorCMSIS::~FrequencyDetectorCMSIS() {
   //
 }
 
-void FrequencyDetector::Init(float sampleRate) {
+void FrequencyDetectorCMSIS::Init(float sampleRate) {
   m_cachedSampleRate = sampleRate;
 }
 
@@ -52,7 +53,7 @@ float do_fft(float *input, float *output, float sampleRate) {
   return (float)index * ((float)Fmax / Nbins);
 }
 
-void FrequencyDetector::Process(float in) {
+void FrequencyDetectorCMSIS::Process(float in) {
   if (m_fft_buf_index < FFT_BUF_SIZE) {
     fft_buf[m_fft_buf_index++] = in;
     fft_buf[m_fft_buf_index++] = 0.f;

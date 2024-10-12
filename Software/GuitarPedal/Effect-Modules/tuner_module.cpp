@@ -1,6 +1,9 @@
 #include "tuner_module.h"
 
 #include "../Util/audio_utilities.h"
+#include "../Util/frequency_detector_cmsis.h"
+#include "../Util/frequency_detector_q.h"
+#include "../Util/frequency_detector_yin.h"
 
 using namespace bkshepherd;
 
@@ -16,24 +19,39 @@ static const int s_paramCount = 0;
 static const ParameterMetaData s_metaData[s_paramCount] = {};
 
 // Default Constructor
-TunerModule::TunerModule() : BaseEffectModule() {
-  // Set the name of the effect
-  m_name = "Tuner";
-
+TunerModule::TunerModule(TunerVariant variant) : BaseEffectModule() {
   // Setup the meta data reference for this Effect
   m_paramMetaData = s_metaData;
 
   // Initialize Parameters for this Effect
   this->InitParams(0);
+
+  switch (variant) {
+    case TunerVariant::Q:
+      m_name = "Tuner [Q]";
+      m_frequencyDetector = new FrequencyDetectorQ();
+      break;
+    case TunerVariant::CMSIS_FFT:
+      m_name = "Tuner [CMSIS]";
+      m_frequencyDetector = new FrequencyDetectorCMSIS();
+      break;
+    case TunerVariant::YIN:
+      m_name = "Tuner [YIN]";
+      m_frequencyDetector = new FrequencyDetectorYin();
+      break;
+  }
 }
 
 // Destructor
-TunerModule::~TunerModule() {}
+TunerModule::~TunerModule() {
+  delete m_frequencyDetector;
+  m_frequencyDetector = nullptr;
+}
 
 void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
-  m_frequencyDetector.Init(sample_rate);
+  m_frequencyDetector->Init(sample_rate);
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -52,10 +70,10 @@ void TunerModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
   // Run the detector
-  m_frequencyDetector.Process(in);
+  m_frequencyDetector->Process(in);
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = round(m_frequencyDetector.GetFrequency());
+  m_currentFrequency = round(m_frequencyDetector->GetFrequency());
 
   m_audioRight = m_audioLeft = in;
 }

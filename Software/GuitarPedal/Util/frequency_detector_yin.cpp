@@ -1,4 +1,4 @@
-#include "frequency_detector_alt.h"
+#include "frequency_detector_yin.h"
 
 #include "yin.h"
 
@@ -6,19 +6,19 @@
 float buffer[BUFFER_LEN];
 Yin yin;
 
-FrequencyDetectorAlt::FrequencyDetectorAlt() {
+FrequencyDetectorYin::FrequencyDetectorYin() : FrequencyDetectorInterface() {
   //
 }
 
-FrequencyDetectorAlt::~FrequencyDetectorAlt() {
+FrequencyDetectorYin::~FrequencyDetectorYin() {
   //
 }
 
-void FrequencyDetectorAlt::Init(float sampleRate) {
+void FrequencyDetectorYin::Init(float sampleRate) {
   //
 }
 
-void FrequencyDetectorAlt::Process(float in) {
+void FrequencyDetectorYin::Process(float in) {
   if (m_bufferIndex < BUFFER_LEN) {
     buffer[m_bufferIndex++] = in;
   } else if (m_bufferIndex == BUFFER_LEN) {
