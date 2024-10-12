@@ -9,6 +9,7 @@
 #include "Effect-Modules/multi_delay_module.h"
 #include "Effect-Modules/neural_amp_ir_module.h"
 #include "Effect-Modules/overdrive_module.h"
+#include "Effect-Modules/pitch_shifter_module.h"
 #include "Effect-Modules/reverb_module.h"
 #include "Effect-Modules/tuner_module.h"
 #include "Hardware-Modules/guitar_pedal_125b.h"
@@ -467,11 +468,12 @@ int main(void) {
   availableEffects[7] = new MetroModule();
   availableEffects[8] = new NeuralAmpIRModule();
   availableEffects[9] = new LooperModule();
-  availableEffects[10] =
-      new TunerModule(bkshepherd::TunerModule::TunerVariant::Q);
+  availableEffects[10] = new PitchShifterModule();
   availableEffects[11] =
-      new TunerModule(bkshepherd::TunerModule::TunerVariant::YIN);
+      new TunerModule(bkshepherd::TunerModule::TunerVariant::Q);
   availableEffects[12] =
+      new TunerModule(bkshepherd::TunerModule::TunerVariant::YIN);
+  availableEffects[13] =
       new TunerModule(bkshepherd::TunerModule::TunerVariant::CMSIS_FFT);
 
   for (int i = 0; i < availableEffectsCount; i++) {
