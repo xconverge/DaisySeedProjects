@@ -41,7 +41,7 @@ PitchShifterModule::~PitchShifterModule() {}
 void PitchShifterModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
-  pitchShifter.Init(sample_rate);
+  pitchShifter.Init(sample_rate, true);
 
   const int semitone = GetParameterAsBinnedValue(0);
   pitchShifter.SetTransposition((float)semitone);
