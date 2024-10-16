@@ -157,7 +157,7 @@ class PitchShifter {
   /** Shift can be 30-100 ms lets just start with 50 for now.
   0.050 * SR = 2400 samples (at 48kHz) */
   // static constexpr size_t kShiftDelaySize = 16384;
-  static constexpr size_t kShiftDelaySize = 4800;
+  static constexpr size_t kShiftDelaySize = 2000;
   typedef DelayLine<float, kShiftDelaySize> ShiftDelay;
   ShiftDelay d_[2];
   float pitch_shift_, mod_freq_;

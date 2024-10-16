@@ -456,7 +456,7 @@ int main(void) {
       hardware.GetNumberOfSamplesForTime(crossFaderTransitionTimeInSeconds);
 
   // Init the Effects Modules
-  availableEffectsCount = 13;
+  availableEffectsCount = 14;
   availableEffects = new BaseEffectModule *[availableEffectsCount];
   availableEffects[0] = new ModulatedTremoloModule();
   availableEffects[1] = new OverdriveModule();

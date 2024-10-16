@@ -178,6 +178,8 @@ void NeuralAmpIRModule::ProcessMono(float in) {
 
   // Impulse Response
   float impulse_out = 0.0;
+
+  // TODO: crashes when altering this knob?
   if (GetParameterAsBool(5)) {
     // 0.2 is level adjust for loud output
     impulse_out = m_IR.Process(filter_out) * 0.2;

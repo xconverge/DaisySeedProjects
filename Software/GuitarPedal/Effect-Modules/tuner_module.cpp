@@ -23,19 +23,19 @@ TunerModule::TunerModule(TunerVariant variant) : BaseEffectModule() {
   m_paramMetaData = s_metaData;
 
   // Initialize Parameters for this Effect
-  this->InitParams(0);
+  this->InitParams(s_paramCount);
 
   switch (variant) {
     case TunerVariant::Q:
-      m_name = "Tuner [Q]";
+      m_name = "TuneQ";
       m_frequencyDetector = new FrequencyDetectorQ();
       break;
     case TunerVariant::CMSIS_FFT:
-      m_name = "Tuner [CMSIS]";
+      m_name = "TuneFFT";
       m_frequencyDetector = new FrequencyDetectorCMSIS();
       break;
     case TunerVariant::YIN:
-      m_name = "Tuner [YIN]";
+      m_name = "TuneYIN";
       m_frequencyDetector = new FrequencyDetectorYin();
       break;
   }

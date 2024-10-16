@@ -32,7 +32,7 @@ PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
   m_paramMetaData = s_metaData;
 
   // Initialize Parameters for this Effect
-  this->InitParams(0);
+  this->InitParams(s_paramCount);
 }
 
 // Destructor
@@ -47,12 +47,14 @@ void PitchShifterModule::Init(float sample_rate) {
   pitchShifter.SetTransposition((float)semitone);
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
+
+  // TODO: Fix loud noise at startup
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id) {
   if (parameter_id == 0) {
     // Change semitone when knob is turned
-    const int semitone = GetParameterAsBinnedValue(0);
+    const int semitone = (GetParameterAsBinnedValue(0) - 1) * -1;
     pitchShifter.SetTransposition((float)semitone);
   }
 }
