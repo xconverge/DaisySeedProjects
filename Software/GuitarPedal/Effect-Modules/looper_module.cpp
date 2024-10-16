@@ -131,17 +131,12 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
                            isEditing);
   uint16_t center = boundsToDrawIn.GetHeight() / 2;
 
-  // TODO SK: Improve to show loop length/where in the loop we are instead of
-  // just "is near beginning"
+  float percentageDone = 100.0 * (m_looperL.GetPos() / m_looperL.GetRecSize());
   char strbuff[64];
-  if (m_looperL.IsNearBeginning()) {
-    sprintf(strbuff, "..START..");
+  if (m_looperL.Recording()) {
+    sprintf(strbuff, "R %.2f  ", percentageDone);
   } else {
-    if (m_looperL.Recording()) {
-      sprintf(strbuff, "..REC..");
-    } else {
-      sprintf(strbuff, ".......");
-    }
+    sprintf(strbuff, "  %.2f  ", percentageDone);
   }
 
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,

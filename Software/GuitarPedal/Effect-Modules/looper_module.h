@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+#include "../Util/looper.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
@@ -31,8 +32,8 @@ class LooperModule : public BaseEffectModule {
 
  private:
   // Loopers and the buffers they'll use
-  Looper m_looperL;
-  Looper m_looperR;
+  daisysp_modified::Looper m_looperL;
+  daisysp_modified::Looper m_looperR;
 
   float m_inputLevelMin;
   float m_inputLevelMax;

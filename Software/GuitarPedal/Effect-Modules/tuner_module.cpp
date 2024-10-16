@@ -112,7 +112,6 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
                              Alignment::centered, true);
 
-  // TODO SK: is this freq cutoff and not shown?
   char strbuffFreq[64];
   sprintf(strbuffFreq, "%.2f", m_currentFrequency);
   display.WriteStringAligned(strbuffFreq, Font_11x18, boundsToDrawIn,
