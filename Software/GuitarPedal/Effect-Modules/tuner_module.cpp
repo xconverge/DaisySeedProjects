@@ -72,7 +72,7 @@ void TunerModule::ProcessMono(float in) {
   m_frequencyDetector->Process(in);
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = round(m_frequencyDetector->GetFrequency());
+  m_currentFrequency = m_frequencyDetector->GetFrequency();
 
   m_audioRight = m_audioLeft = in;
 }
