@@ -131,8 +131,8 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
                            isEditing);
   uint16_t center = boundsToDrawIn.GetHeight() / 2;
 
-  // TODO: Improve to show loop length/where in the loop we are instead of just
-  // "is near beginning"
+  // TODO SK: Improve to show loop length/where in the loop we are instead of
+  // just "is near beginning"
   char strbuff[64];
   if (m_looperL.IsNearBeginning()) {
     sprintf(strbuff, "..START..");

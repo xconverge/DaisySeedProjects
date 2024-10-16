@@ -48,7 +48,7 @@ void PitchShifterModule::Init(float sample_rate) {
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
 
-  // TODO: Fix loud noise at startup
+  // TODO SK: Fix loud noise at startup
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id) {
