@@ -21,7 +21,9 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
 };
 
-static daisysp_modified::PitchShifter DSY_SDRAM_BSS pitchShifter;
+// TODO SK: Fixed loud noise at startup (First time after power cycle) by NOT
+// putting this in DSY_SDRAM_BSS
+static daisysp_modified::PitchShifter pitchShifter;
 static CrossFade pitchCrossfade;
 
 // Default Constructor
@@ -47,8 +49,6 @@ void PitchShifterModule::Init(float sample_rate) {
   pitchShifter.SetTransposition((float)semitone);
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
-
-  // TODO SK: Fix loud noise at startup
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id) {
