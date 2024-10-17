@@ -22,7 +22,6 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 };
 
 static daisysp_modified::PitchShifter DSY_SDRAM_BSS pitchShifter;
-static CrossFade pitchCrossfade;
 
 // Default Constructor
 PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
@@ -45,10 +44,6 @@ void PitchShifterModule::Init(float sample_rate) {
 
   const int semitone = GetParameterAsBinnedValue(0);
   pitchShifter.SetTransposition((float)semitone);
-
-  pitchCrossfade.Init(CROSSFADE_CPOW);
-
-  // TODO SK: Fix loud noise at startup
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id) {
@@ -63,8 +58,7 @@ void PitchShifterModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
   float shifted = pitchShifter.Process(in);
-  const float out = pitchCrossfade.Process(in, shifted);
-  m_audioRight = m_audioLeft = out;
+  m_audioRight = m_audioLeft = shifted;
 }
 
 void PitchShifterModule::ProcessStereo(float inL, float inR) {

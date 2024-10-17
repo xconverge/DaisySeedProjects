@@ -12,7 +12,7 @@ CPP_SOURCES = guitar_pedal.cpp \
               $(wildcard */*.cpp)
 
 # Compiler options
-OPT = -O1
+OPT = -Os
 
 # Boot options
 APP_TYPE = BOOT_SRAM

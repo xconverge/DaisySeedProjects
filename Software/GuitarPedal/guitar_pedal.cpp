@@ -540,7 +540,7 @@ int main(void) {
   lastTimeStampUS = System::GetUs();
 
   // Setup Debug Logging
-  // hardware.seed.StartLog();
+  hardware.seed.StartLog();
 
   while (1) {
     // Handle Clock Time
