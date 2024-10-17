@@ -19,6 +19,7 @@ void FrequencyDetectorYin::Init(float sampleRate) {
 }
 
 void FrequencyDetectorYin::Process(float in) {
+  // TODO SK: This doesn't work right
   if (m_bufferIndex < BUFFER_LEN) {
     buffer[m_bufferIndex++] = in;
   } else if (m_bufferIndex == BUFFER_LEN) {
