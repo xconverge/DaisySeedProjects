@@ -1,6 +1,5 @@
 #include "tuner_module.h"
 
-#include "../Util/frequency_detector_cmsis.h"
 #include "../Util/frequency_detector_q.h"
 #include "../Util/frequency_detector_yin.h"
 
@@ -29,10 +28,6 @@ TunerModule::TunerModule(TunerVariant variant) : BaseEffectModule() {
     case TunerVariant::Q:
       m_name = "TuneQ";
       m_frequencyDetector = new FrequencyDetectorQ();
-      break;
-    case TunerVariant::CMSIS_FFT:
-      m_name = "TuneFFT";
-      m_frequencyDetector = new FrequencyDetectorCMSIS();
       break;
     case TunerVariant::YIN:
       m_name = "TuneYIN";

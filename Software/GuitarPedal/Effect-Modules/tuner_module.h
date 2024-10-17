@@ -17,7 +17,7 @@ namespace bkshepherd {
 
 class TunerModule : public BaseEffectModule {
  public:
-  enum class TunerVariant { Q, CMSIS_FFT, YIN };
+  enum class TunerVariant { Q, YIN };
   TunerModule(TunerVariant variant);
   ~TunerModule();
 

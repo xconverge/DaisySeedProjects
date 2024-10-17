@@ -456,7 +456,7 @@ int main(void) {
       hardware.GetNumberOfSamplesForTime(crossFaderTransitionTimeInSeconds);
 
   // Init the Effects Modules
-  availableEffectsCount = 14;
+  availableEffectsCount = 13;
   availableEffects = new BaseEffectModule *[availableEffectsCount];
   availableEffects[0] = new ModulatedTremoloModule();
   availableEffects[1] = new OverdriveModule();
@@ -473,8 +473,6 @@ int main(void) {
       new TunerModule(bkshepherd::TunerModule::TunerVariant::Q);
   availableEffects[12] =
       new TunerModule(bkshepherd::TunerModule::TunerVariant::YIN);
-  availableEffects[13] =
-      new TunerModule(bkshepherd::TunerModule::TunerVariant::CMSIS_FFT);
 
   for (int i = 0; i < availableEffectsCount; i++) {
     availableEffects[i]->Init(sample_rate);
