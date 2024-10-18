@@ -53,15 +53,11 @@ uint8_t Note(float frequency) {
 uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 
 void TunerModule::ProcessMono(float in) {
-  BaseEffectModule::ProcessMono(in);
-
   // Run the detector
   m_frequencyDetector->Process(in);
 
   // Try to get the latest frequency from the detector
   m_currentFrequency = m_frequencyDetector->GetFrequency();
-
-  m_audioRight = m_audioLeft = in;
 }
 
 void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
@@ -79,19 +75,24 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
   sprintf(currentNote, "%s%u", k_notes[Note(m_currentFrequency) % 12],
           Octave(m_currentFrequency));
 
+  const int8_t close = 1;
+  const int8_t medium = 3;
+  const int8_t far = 10;
+
   char strbuff[64];
-  if (cents < -1) {
-    if (cents < -10) {
-      sprintf(strbuff, "o o %s    ", currentNote);
-    } else {
-      sprintf(strbuff, "  o %s    ", currentNote);
-    }
-  } else if (cents > 1) {
-    if (cents > 10) {
-      sprintf(strbuff, "    %s o o", currentNote);
-    } else {
-      sprintf(strbuff, "    %s o  ", currentNote);
-    }
+
+  if (cents < -far) {
+    sprintf(strbuff, "ooo %s    ", currentNote);
+  } else if (cents < -medium) {
+    sprintf(strbuff, " oo %s    ", currentNote);
+  } else if (cents < -close) {
+    sprintf(strbuff, "  o %s    ", currentNote);
+  } else if (cents > far) {
+    sprintf(strbuff, "    %s ooo", currentNote);
+  } else if (cents > medium) {
+    sprintf(strbuff, "    %s oo ", currentNote);
+  } else if (cents > close) {
+    sprintf(strbuff, "    %s o  ", currentNote);
   } else {
     sprintf(strbuff, "   [%s]   ", currentNote);
   }
