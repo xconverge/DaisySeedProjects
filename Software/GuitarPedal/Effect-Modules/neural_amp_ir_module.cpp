@@ -56,7 +56,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueType : ParameterValueType::Binned,
       valueBinCount : 8,
       valueBinNames : s_modelBinNames,
-      defaultValue : 0,
+      defaultValue : (127 / 8) * 4,
       knobMapping : 3,
       midiCCMapping : -1
     },
@@ -65,7 +65,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueType : ParameterValueType::Binned,
       valueBinCount : 10,
       valueBinNames : s_IRBinNames,
-      defaultValue : 0,
+      defaultValue : (127 / 10) * 7,
       knobMapping : 4,
       midiCCMapping : -1
     },

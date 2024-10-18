@@ -49,6 +49,8 @@ void TunerModule::ProcessMono(float in) {
   // Run the detector
   m_frequencyDetector.Process(in);
 
+  // TODO SK: add some smoothing?
+
   // Try to get the latest frequency from the detector
   m_currentFrequency = m_frequencyDetector.GetFrequency();
 }
