@@ -36,6 +36,9 @@ class NeuralAmpIRModule : public BaseEffectModule {
 
   int m_currentIRIndex = -1;
 
+  bool m_irEnabled = true;
+  bool m_ampEnabled = true;
+
   float m_gainMin;
   float m_gainMax;
 

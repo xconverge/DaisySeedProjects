@@ -23,7 +23,9 @@ static const char* s_modelBinNames[8] = {
     "H&K Clean", "Bassman",   "5150", "Splawn",
 };
 
-static const int s_paramCount = 6;
+static const char* s_OffOnBinNames[2] = {"OFF", "ON"};
+
+static const int s_paramCount = 7;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "Level",
@@ -69,10 +71,20 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
     {
       name : "IR Enabled",
-      valueType : ParameterValueType::Bool,
-      valueBinCount : 0,
+      valueType : ParameterValueType::Binned,
+      valueBinCount : 2,
+      valueBinNames : s_OffOnBinNames,
       defaultValue : 127,
       knobMapping : 5,
+      midiCCMapping : -1
+    },
+    {
+      name : "Amp Enabled",
+      valueType : ParameterValueType::Binned,
+      valueBinCount : 2,
+      valueBinNames : s_OffOnBinNames,
+      defaultValue : 127,
+      knobMapping : -1,
       midiCCMapping : -1
     },
 };
@@ -140,6 +152,10 @@ void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
     CalculateTone();
   } else if (parameter_id == 4) {  // Change IR
     SelectIR();
+  } else if (parameter_id == 5) {  // IR Enabled
+    m_irEnabled = GetParameterAsBinnedValue(5) == 2;
+  } else if (parameter_id == 6) {  // Amp Enabled
+    m_ampEnabled = GetParameterAsBinnedValue(6) == 2;
   }
 }
 
@@ -188,7 +204,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
 
   // Process Neural Net Model
   float ampOut = 0.0;
-  if (true) {
+  if (m_ampEnabled) {
     ampOut = model.forward(input_arr) + input_arr[0];
 
     // Level adjustment
@@ -203,8 +219,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
   // Impulse Response
   float impulse_out = 0.0;
 
-  // TODO SK: why is this boolean inverted?
-  if (!GetParameterAsBool(5)) {
+  if (m_irEnabled) {
     // 0.2 is level adjust for loud output
     impulse_out = IR.Process(filter_out) * 0.2;
   } else {
