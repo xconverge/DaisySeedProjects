@@ -2,10 +2,8 @@
 #ifndef NEURAL_AMP_IR_MODULE_H
 #define NEURAL_AMP_IR_MODULE_H
 
-#include <RTNeural/RTNeural.h>
 #include <stdint.h>
 
-#include "ImpulseResponse/ImpulseResponse.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 
@@ -33,18 +31,9 @@ class NeuralAmpIRModule : public BaseEffectModule {
   void SelectIR();
   void CalculateTone();
 
-  // Neural Network Model
-  // Currently only using snapshot models, they tend to sound better and
-  //   we can use input level as gain.
-  RTNeural::ModelT<float, 1, 1, RTNeural::GRULayerT<float, 1, 9>,
-                   RTNeural::DenseT<float, 9, 1>>
-      m_model;
-
   int m_currentModelIndex = -1;
   float m_nnLevelAdjust = 0;
 
-  // Impulse Response
-  ImpulseResponse m_IR;
   int m_currentIRIndex = -1;
 
   float m_gainMin;

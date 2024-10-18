@@ -442,7 +442,9 @@ void HandleMidiMessage(MidiEvent m) {
 
 int main(void) {
   hardware.Init();
-  hardware.SetAudioBlockSize(4);
+
+  // Changed audio block size from 4 to allow for amp/IR module to run
+  hardware.SetAudioBlockSize(48);
 
   float sample_rate = hardware.AudioSampleRate();
 

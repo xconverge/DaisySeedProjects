@@ -1,5 +1,8 @@
 #include "neural_amp_ir_module.h"
 
+#include <RTNeural/RTNeural.h>
+
+#include "ImpulseResponse/ImpulseResponse.h"
 #include "ImpulseResponse/ir_data.h"
 
 // Model Weights (edit this file to add model weights trained with Colab script)
@@ -74,6 +77,25 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
 };
 
+// Neural Network Model
+// Currently only using snapshot models, they tend to sound better and
+//   we can use input level as gain.
+RTNeural::ModelT<float, 1, 1, RTNeural::GRULayerT<float, 1, 9>,
+                 RTNeural::DenseT<float, 9, 1>>
+    model;
+
+// clang-format off
+// Notes: With default settings, GRU 10 is max size currently able to run on Daisy Seed
+//        - Parameterized 1-knob GRU 10 is max, GRU 8 with effects is max
+//        - Parameterized 2-knob/3-knob at GRU 8 is max
+//        - With multi effect (reverb, etc.) added GRU 9 is recommended to allow room for processing of other effects
+//        - These models should be trained using 48kHz audio data, since Daisy uses 48kHz by default.
+//             Models trained with other samplerates, or running Daisy at a different samplerate will sound different.
+// clang-format on
+
+// Impulse Response
+ImpulseResponse IR;
+
 // Default Constructor
 NeuralAmpIRModule::NeuralAmpIRModule()
     : BaseEffectModule(),
@@ -123,26 +145,26 @@ void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
 
 void NeuralAmpIRModule::SelectModel() {
   const int modelIndex = GetParameterAsBinnedValue(3) - 1;
-  if (m_currentModelIndex != modelIndex) {
-    auto& gru = (m_model).template get<0>();
-    auto& dense = (m_model).template get<1>();
+  if (modelIndex != m_currentModelIndex) {
+    auto& gru = (model).template get<0>();
+    auto& dense = (model).template get<1>();
     gru.setWVals(model_collection[modelIndex].rec_weight_ih_l0);
     gru.setUVals(model_collection[modelIndex].rec_weight_hh_l0);
     gru.setBVals(model_collection[modelIndex].rec_bias);
     dense.setWeights(model_collection[modelIndex].lin_weight);
     dense.setBias(model_collection[modelIndex].lin_bias.data());
-    m_model.reset();
+    model.reset();
     m_nnLevelAdjust = model_collection[modelIndex].levelAdjust;
+    m_currentModelIndex = modelIndex;
   }
-  m_currentModelIndex = modelIndex;
 }
 
 void NeuralAmpIRModule::SelectIR() {
   const int irIndex = GetParameterAsBinnedValue(4) - 1;
   if (irIndex != m_currentIRIndex) {
-    m_IR.Init(ir_collection[irIndex]);
+    IR.Init(ir_collection[irIndex]);
+    m_currentIRIndex = irIndex;
   }
-  m_currentIRIndex = irIndex;
 }
 
 void NeuralAmpIRModule::CalculateTone() {
@@ -162,29 +184,29 @@ void NeuralAmpIRModule::ProcessMono(float in) {
   // Apply gain
   const float gain =
       m_gainMin + (GetParameterAsMagnitude(2) * (m_gainMax - m_gainMin));
-  input_arr[0] = m_audioLeft * gain;
+  input_arr[0] = in * gain;
 
   // Process Neural Net Model
   float ampOut = 0.0;
   if (true) {
-    ampOut = m_model.forward(input_arr) + input_arr[0];
+    ampOut = model.forward(input_arr) + input_arr[0];
 
     // Level adjustment
-    ampOut *= m_nnLevelAdjust * 0.5;
+    ampOut *= m_nnLevelAdjust;
   } else {
     ampOut = input_arr[0];
   }
 
   // Process Tone
-  const float filter_out = m_tone.Process(ampOut);
+  float filter_out = m_tone.Process(ampOut);
 
   // Impulse Response
   float impulse_out = 0.0;
 
-  // TODO SK: crashes when trying to run IR
-  if (false && GetParameterAsBool(5)) {
+  // TODO SK: why is this boolean inverted?
+  if (!GetParameterAsBool(5)) {
     // 0.2 is level adjust for loud output
-    impulse_out = m_IR.Process(filter_out) * 0.2;
+    impulse_out = IR.Process(filter_out) * 0.2;
   } else {
     impulse_out = filter_out;
   }
