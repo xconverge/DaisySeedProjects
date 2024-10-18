@@ -1,7 +1,5 @@
 #include "tuner_module.h"
 
-#include "../Util/frequency_detector_q.h"
-
 using namespace bkshepherd;
 
 using namespace daisy;
@@ -24,20 +22,15 @@ TunerModule::TunerModule() : BaseEffectModule() {
   this->InitParams(s_paramCount);
 
   m_name = "TuneQ";
-
-  m_frequencyDetector = new FrequencyDetectorQ();
 }
 
 // Destructor
-TunerModule::~TunerModule() {
-  delete m_frequencyDetector;
-  m_frequencyDetector = nullptr;
-}
+TunerModule::~TunerModule() {}
 
 void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
-  m_frequencyDetector->Init(sample_rate);
+  m_frequencyDetector.Init(sample_rate);
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -54,10 +47,10 @@ uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 
 void TunerModule::ProcessMono(float in) {
   // Run the detector
-  m_frequencyDetector->Process(in);
+  m_frequencyDetector.Process(in);
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = m_frequencyDetector->GetFrequency();
+  m_currentFrequency = m_frequencyDetector.GetFrequency();
 }
 
 void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }

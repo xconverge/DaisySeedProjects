@@ -20,7 +20,7 @@ signal_conditioner::config preprocessor_config;
 signal_conditioner preprocessor{preprocessor_config, lowest_frequency,
                                 highest_frequency, sample_rate};
 
-FrequencyDetectorQ::FrequencyDetectorQ() : FrequencyDetectorInterface() {
+FrequencyDetectorQ::FrequencyDetectorQ() {
   //
 }
 
