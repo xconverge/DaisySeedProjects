@@ -1,7 +1,6 @@
 #include "tuner_module.h"
 
 #include "../Util/frequency_detector_q.h"
-#include "../Util/frequency_detector_yin.h"
 
 using namespace bkshepherd;
 
@@ -17,23 +16,16 @@ static const int s_paramCount = 0;
 static const ParameterMetaData s_metaData[s_paramCount] = {};
 
 // Default Constructor
-TunerModule::TunerModule(TunerVariant variant) : BaseEffectModule() {
+TunerModule::TunerModule() : BaseEffectModule() {
   // Setup the meta data reference for this Effect
   m_paramMetaData = s_metaData;
 
   // Initialize Parameters for this Effect
   this->InitParams(s_paramCount);
 
-  switch (variant) {
-    case TunerVariant::Q:
-      m_name = "TuneQ";
-      m_frequencyDetector = new FrequencyDetectorQ();
-      break;
-    case TunerVariant::YIN:
-      m_name = "TuneYIN";
-      m_frequencyDetector = new FrequencyDetectorYin();
-      break;
-  }
+  m_name = "TuneQ";
+
+  m_frequencyDetector = new FrequencyDetectorQ();
 }
 
 // Destructor

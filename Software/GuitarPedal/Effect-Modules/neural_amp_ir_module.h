@@ -41,7 +41,7 @@ class NeuralAmpIRModule : public BaseEffectModule {
       m_model;
 
   int m_currentModelIndex = -1;
-  float m_nnLevelAdjust;
+  float m_nnLevelAdjust = 0;
 
   // Impulse Response
   ImpulseResponse m_IR;

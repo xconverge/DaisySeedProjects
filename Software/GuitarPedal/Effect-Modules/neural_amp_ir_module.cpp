@@ -9,6 +9,8 @@
 
 using namespace bkshepherd;
 
+static DaisySeed hw;
+
 static const char* s_IRBinNames[10] = {
     "Rhythm",  "Lead",    "Clean",   "Marsh",     "Bogn",
     "Proteus", "Rectify", "Rhythm2", "US Deluxe", "British"};

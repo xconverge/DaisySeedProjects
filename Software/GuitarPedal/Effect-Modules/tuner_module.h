@@ -17,8 +17,7 @@ namespace bkshepherd {
 
 class TunerModule : public BaseEffectModule {
  public:
-  enum class TunerVariant { Q, YIN };
-  TunerModule(TunerVariant variant);
+  TunerModule();
   ~TunerModule();
 
   void Init(float sample_rate) override;
@@ -29,7 +28,7 @@ class TunerModule : public BaseEffectModule {
               bool isEditing) override;
 
  private:
-  float m_currentFrequency;
+  float m_currentFrequency = 0;
 
   FrequencyDetectorInterface* m_frequencyDetector = nullptr;
 };
