@@ -1,5 +1,7 @@
 #include "tuner_module.h"
 
+#include <q/fx/moving_average.hpp>
+
 using namespace bkshepherd;
 
 using namespace daisy;
@@ -12,6 +14,8 @@ const uint16_t k_screenWidth = 128;
 
 static const int s_paramCount = 0;
 static const ParameterMetaData s_metaData[s_paramCount] = {};
+
+auto movingAverage = cycfi::q::moving_average{10000};
 
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule() {
@@ -49,10 +53,10 @@ void TunerModule::ProcessMono(float in) {
   // Run the detector
   m_frequencyDetector.Process(in);
 
-  // TODO SK: add some smoothing?
+  // TODO SK: Change smoothing from moving average to something else?
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = m_frequencyDetector.GetFrequency();
+  m_currentFrequency = movingAverage(m_frequencyDetector.GetFrequency());
 }
 
 void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
