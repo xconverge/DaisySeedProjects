@@ -8,15 +8,23 @@ using namespace daisy;
 using namespace daisysp;
 
 static const char* s_semitoneBinNames[5] = {"0", "1", "2", "3", "4"};
-static const int s_paramCount = 1;
+static const int s_paramCount = 2;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "Semitone",
       valueType : ParameterValueType::Binned,
       valueBinCount : 5,
       valueBinNames : s_semitoneBinNames,
-      defaultValue : 30,
+      defaultValue : (127 / 5) * 1,
       knobMapping : 0,
+      midiCCMapping : -1
+    },
+    {
+      name : "Crossfade",
+      valueType : ParameterValueType::FloatMagnitude,
+      valueBinCount : 0,
+      defaultValue : 64,
+      knobMapping : 1,
       midiCCMapping : -1
     },
 };
@@ -36,6 +44,8 @@ PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
 
   // Initialize Parameters for this Effect
   this->InitParams(s_paramCount);
+
+  pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
 }
 
 // Destructor
@@ -57,6 +67,8 @@ void PitchShifterModule::ParameterChanged(int parameter_id) {
     // Change semitone when knob is turned
     const int semitone = (GetParameterAsBinnedValue(0) - 1) * -1;
     pitchShifter.SetTransposition((float)semitone);
+  } else if (parameter_id == 1) {
+    pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
   }
 }
 
