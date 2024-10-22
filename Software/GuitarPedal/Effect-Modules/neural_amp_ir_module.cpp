@@ -74,7 +74,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       valueType : ParameterValueType::Binned,
       valueBinCount : 2,
       valueBinNames : s_OffOnBinNames,
-      defaultValue : 127,
+      defaultValue : 0,
       knobMapping : 5,
       midiCCMapping : -1
     },

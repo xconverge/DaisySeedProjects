@@ -7,15 +7,15 @@ using namespace bkshepherd;
 using namespace daisy;
 using namespace daisysp;
 
-static const char* s_semitoneBinNames[7] = {"1", "2", "3", "4", "5", "6", "7"};
+static const char* s_semitoneBinNames[5] = {"0", "1", "2", "3", "4"};
 static const int s_paramCount = 1;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
       name : "Semitone",
       valueType : ParameterValueType::Binned,
-      valueBinCount : 7,
+      valueBinCount : 5,
       valueBinNames : s_semitoneBinNames,
-      defaultValue : 0,
+      defaultValue : 30,
       knobMapping : 0,
       midiCCMapping : -1
     },
@@ -24,6 +24,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 // TODO SK: Fixed loud noise at startup (First time after power cycle) by NOT
 // putting this in DSY_SDRAM_BSS
 static daisysp_modified::PitchShifter pitchShifter;
+
 static CrossFade pitchCrossfade;
 
 // Default Constructor
@@ -45,7 +46,7 @@ void PitchShifterModule::Init(float sample_rate) {
 
   pitchShifter.Init(sample_rate, true);
 
-  const int semitone = GetParameterAsBinnedValue(0);
+  const int semitone = (GetParameterAsBinnedValue(0) - 1) * -1;
   pitchShifter.SetTransposition((float)semitone);
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
@@ -63,7 +64,9 @@ void PitchShifterModule::ProcessMono(float in) {
   BaseEffectModule::ProcessMono(in);
 
   float shifted = pitchShifter.Process(in);
+
   const float out = pitchCrossfade.Process(in, shifted);
+
   m_audioRight = m_audioLeft = out;
 }
 
