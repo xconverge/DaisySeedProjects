@@ -23,13 +23,13 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
       name : "Crossfade",
       valueType : ParameterValueType::FloatMagnitude,
       valueBinCount : 0,
-      defaultValue : 64,
+      defaultValue : 127,
       knobMapping : 1,
       midiCCMapping : -1
     },
 };
 
-// TODO SK: Fixed loud noise at startup (First time after power cycle) by NOT
+// Fixed loud noise at startup (First time after power cycle) by NOT
 // putting this in DSY_SDRAM_BSS
 static daisysp_modified::PitchShifter pitchShifter;
 
@@ -44,8 +44,6 @@ PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
 
   // Initialize Parameters for this Effect
   this->InitParams(s_paramCount);
-
-  pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
 }
 
 // Destructor
@@ -60,6 +58,8 @@ void PitchShifterModule::Init(float sample_rate) {
   pitchShifter.SetTransposition((float)semitone);
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
+
+  pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id) {
