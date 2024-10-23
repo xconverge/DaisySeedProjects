@@ -33,6 +33,11 @@ class PitchShifterModule : public BaseEffectModule {
   bool m_alternateFootswitchPressed = false;
 
   float m_semitoneTarget = 0;
+  float m_semitoneCurrent = 0;
+  float m_percentageComplete = 0;
+
+  float m_delayValue = 0;
+  uint32_t m_sampleCounter = 0;
 };
 }  // namespace bkshepherd
 #endif
