@@ -23,6 +23,16 @@ class PitchShifterModule : public BaseEffectModule {
   void ProcessMono(float in) override;
   void ProcessStereo(float inL, float inR) override;
   void ParameterChanged(int parameter_id) override;
+
+  void AlternateFootswitchPressed() override;
+  void AlternateFootswitchReleased() override;
+
+ private:
+  bool m_latching = true;
+  bool m_directionDown = true;
+  bool m_alternateFootswitchPressed = false;
+
+  float m_semitoneTarget = 0;
 };
 }  // namespace bkshepherd
 #endif

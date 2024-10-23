@@ -276,7 +276,8 @@ class BaseEffectModule {
   virtual void MidiCCValueNotification(uint8_t control_num, uint8_t value);
 
   virtual void AlternateFootswitchPressed() {};
-  virtual void AlternateFootswitchHeld() {};
+  virtual void AlternateFootswitchReleased() {};
+  virtual void AlternateFootswitchHeldFor1Second() {};
 
  protected:
   /** Initializes the Parameter Storage and creates space for the specified

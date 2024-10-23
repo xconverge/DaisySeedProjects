@@ -67,8 +67,7 @@ void LooperModule::AlternateFootswitchPressed() {
   m_looperR.TrigRecord();
 }
 
-void LooperModule::AlternateFootswitchHeld() {
-  // If you hold the button longer than 1000 ms (1 sec),
+void LooperModule::AlternateFootswitchHeldFor1Second() {
   // clear the loop
   m_looperL.Clear();
   m_looperR.Clear();

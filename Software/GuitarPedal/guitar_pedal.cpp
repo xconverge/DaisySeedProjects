@@ -143,7 +143,8 @@ static void AudioCallback(AudioHandle::InputBuffer in,
 
   // If both footswitches are down, save the parameters for this effect to
   // persistant storage
-  if (hardware.switches[1].TimeHeldMs() > 2000 &&
+  if (hardware.switches[0].TimeHeldMs() > 2000 &&
+      hardware.switches[1].TimeHeldMs() > 2000 &&
       !guitarPedalUI.IsShowingSavingSettingsScreen()) {
     needToSaveSettingsForActiveEffect = true;
   }
@@ -158,9 +159,14 @@ static void AudioCallback(AudioHandle::InputBuffer in,
       activeEffect->AlternateFootswitchPressed();
     }
 
+    bool switchReleased = hardware.switches[i].FallingEdge();
+    if (switchReleased && i == 1) {
+      activeEffect->AlternateFootswitchReleased();
+    }
+
     bool switchHeld = hardware.switches[i].TimeHeldMs() >= 1000.f;
     if (switchHeld && i == 1) {
-      activeEffect->AlternateFootswitchHeld();
+      activeEffect->AlternateFootswitchHeldFor1Second();
     }
 
     // Find which hardware switch is mapped to the Effect On/Off Bypass function
@@ -183,6 +189,10 @@ static void AudioCallback(AudioHandle::InputBuffer in,
       }
     }
 
+    const bool effectUsesAlternateFootswitch =
+        (std::string(activeEffect->GetName()) != "Looper" &&
+         std::string(activeEffect->GetName()) != "Pitch");
+
     if (switchPressed) {
       // Note that switch is pressed and reset the IdleTimer for detecting
       // double presses
@@ -194,8 +204,7 @@ static void AudioCallback(AudioHandle::InputBuffer in,
         // Register as Tap Tempo if Switch ID matched preferred mapping for
         // TapTempo
 
-        // If looper is active, we can ignore the BPM changes
-        if (std::string(activeEffect->GetName()) != "Looper" &&
+        if (!effectUsesAlternateFootswitch &&
             i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
                      SpecialFunctionType::TapTempo)) {
           needToChangeTempo = true;
