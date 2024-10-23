@@ -1,5 +1,7 @@
 #include "tuner_module.h"
 
+#include "q/fx/lowpass.hpp"
+
 using namespace bkshepherd;
 
 using namespace daisy;
@@ -12,6 +14,9 @@ const uint16_t k_screenWidth = 128;
 
 static const int s_paramCount = 0;
 static const ParameterMetaData s_metaData[s_paramCount] = {};
+
+cycfi::q::dynamic_smoother smoothingFilter{0.3, 48000};
+cycfi::q::dynamic_smoother smoothingFilter2{0.3, 48000};
 
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule() {
@@ -31,14 +36,11 @@ void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
 
   m_frequencyDetector.Init(sample_rate);
-
-  m_smoothingFilter.Init(sample_rate);
-  m_smoothingFilter.SetFreq(4);
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
 
-int16_t Cents(float frequency, uint8_t note) {
+float Cents(float frequency, uint8_t note) {
   return 1200.0f * log(frequency / Pitch(note)) / log(2.0f);
 }
 
@@ -53,8 +55,12 @@ void TunerModule::ProcessMono(float in) {
   m_frequencyDetector.Process(in);
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency =
-      m_smoothingFilter.Process(m_frequencyDetector.GetFrequency());
+  m_currentFrequency = smoothingFilter(m_frequencyDetector.GetFrequency());
+
+  m_note = Note(m_currentFrequency);
+  m_octave = Octave(m_currentFrequency);
+
+  m_cents = Cents(m_currentFrequency, m_note);
 }
 
 void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
@@ -66,29 +72,26 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
                            isEditing);
   uint16_t center = boundsToDrawIn.GetHeight() / 2;
 
-  int16_t cents = Cents(m_currentFrequency, Note(m_currentFrequency));
-
   char currentNote[12];
-  sprintf(currentNote, "%s%u", k_notes[Note(m_currentFrequency) % 12],
-          Octave(m_currentFrequency));
+  sprintf(currentNote, "%s%u", k_notes[m_note % 12], m_octave);
 
-  const int8_t close = 1;
-  const int8_t medium = 3;
-  const int8_t far = 10;
+  const float close = 1.0f;
+  const float medium = 3.0f;
+  const float far = 10.0f;
 
   char strbuff[64];
 
-  if (cents < -far) {
+  if (m_cents < -far) {
     sprintf(strbuff, "ooo %s    ", currentNote);
-  } else if (cents < -medium) {
+  } else if (m_cents < -medium) {
     sprintf(strbuff, " oo %s    ", currentNote);
-  } else if (cents < -close) {
+  } else if (m_cents < -close) {
     sprintf(strbuff, "  o %s    ", currentNote);
-  } else if (cents > far) {
+  } else if (m_cents > far) {
     sprintf(strbuff, "    %s ooo", currentNote);
-  } else if (cents > medium) {
+  } else if (m_cents > medium) {
     sprintf(strbuff, "    %s oo ", currentNote);
-  } else if (cents > close) {
+  } else if (m_cents > close) {
     sprintf(strbuff, "    %s o  ", currentNote);
   } else {
     sprintf(strbuff, "   [%s]   ", currentNote);
@@ -97,6 +100,10 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
                              Alignment::centered, true);
 
+  char strbuffCents[64];
+  sprintf(strbuffCents, "%.2f", m_cents);
+  display.WriteStringAligned(strbuffCents, Font_11x18, boundsToDrawIn,
+                             Alignment::topCentered, true);
   char strbuffFreq[64];
   sprintf(strbuffFreq, "%.2f", m_currentFrequency);
   display.WriteStringAligned(strbuffFreq, Font_11x18, boundsToDrawIn,

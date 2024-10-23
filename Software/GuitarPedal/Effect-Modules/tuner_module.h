@@ -31,8 +31,9 @@ class TunerModule : public BaseEffectModule {
   float m_currentFrequency = 0;
 
   FrequencyDetectorQ m_frequencyDetector;
-
-  Tone m_smoothingFilter;
+  uint8_t m_note = 0;
+  uint8_t m_octave = 0;
+  float m_cents = 0;
 };
 }  // namespace bkshepherd
 #endif

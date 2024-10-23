@@ -13,7 +13,8 @@ frequency lowest_frequency = pitch_names::C[2];
 frequency highest_frequency = pitch_names::C[5];
 
 // The pitch detector
-pitch_detector pd{lowest_frequency, highest_frequency, sample_rate, -40_dB};
+pitch_detector pd{lowest_frequency, highest_frequency, sample_rate,
+                  lin_to_db(0)};
 
 // The pitch detector pre-processor
 signal_conditioner::config preprocessor_config;
@@ -37,7 +38,6 @@ void FrequencyDetectorQ::Process(float in) {
   float pd_sig = preprocessor(in);
 
   // send the processed sample through the pitch detector
-  if (pd(pd_sig)) {
-    m_cachedFrequency = as_float(frequency{pd.get_frequency()});
-  }
+  pd(pd_sig);
+  m_cachedFrequency = as_float(frequency{pd.get_frequency()});
 }
