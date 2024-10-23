@@ -68,6 +68,8 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 static daisysp_modified::PitchShifter pitchShifter;
 
 static CrossFade pitchCrossfade;
+static CrossFade momentaryCrossfade;
+constexpr uint32_t momentarySamplesToCrossfade = 4800;
 
 // Default Constructor
 PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
@@ -90,6 +92,9 @@ void PitchShifterModule::Init(float sample_rate) {
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
   pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
+
+  momentaryCrossfade.Init(CROSSFADE_CPOW);
+  momentaryCrossfade.SetPos(0.0f);
 
   m_latching = GetParameterAsBinnedValue(3) == 1;
 
@@ -156,7 +161,20 @@ void PitchShifterModule::ProcessMono(float in) {
       pitchShifter.SetTransposition(m_semitoneCurrent);
 
       float shifted = pitchShifter.Process(in);
-      out = pitchCrossfade.Process(in, shifted);
+      float pitchOut = pitchCrossfade.Process(in, shifted);
+
+      if (m_sampleCounter == 1) {
+        momentaryCrossfade.SetPos(0.0f);
+      } else if (m_sampleCounter < momentarySamplesToCrossfade) {
+        momentaryCrossfade.SetPos((float)m_sampleCounter /
+                                  (float)momentarySamplesToCrossfade);
+      } else {
+        momentaryCrossfade.SetPos(1.0f);
+      }
+
+      // Add crossfade to avoid popping sound if this is one of the
+      // first few samples coming from a regular passed through input signal
+      out = momentaryCrossfade.Process(in, pitchOut);
     } else if (!m_alternateFootswitchPressed &&
                std::abs(m_semitoneCurrent) > 0) {
       if (m_delayValue > 0) {
@@ -166,24 +184,36 @@ void PitchShifterModule::ProcessMono(float in) {
         m_percentageComplete = 1.0f;
       }
 
-      if (m_percentageComplete >= 0.0f) {
-        if (m_sampleCounter == 1) {
-          m_sampleCounter = 0;
-        } else {
-          m_sampleCounter -= 1;
-        }
+      if (m_percentageComplete >= 0.0f && m_sampleCounter > 0) {
+        m_sampleCounter -= 1;
       }
 
       m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
 
       m_semitoneCurrent = m_semitoneTarget * m_percentageComplete;
       pitchShifter.SetTransposition(m_semitoneCurrent);
+
       float shifted = pitchShifter.Process(in);
-      out = pitchCrossfade.Process(in, shifted);
+      float pitchOut = pitchCrossfade.Process(in, shifted);
+
+      if (m_sampleCounter == 0) {
+        momentaryCrossfade.SetPos(0.0f);
+      } else if (m_sampleCounter < momentarySamplesToCrossfade) {
+        momentaryCrossfade.SetPos((float)m_sampleCounter /
+                                  (float)momentarySamplesToCrossfade);
+      } else {
+        momentaryCrossfade.SetPos(1.0f);
+      }
+
+      // Add crossfade to avoid popping sound if this is one of the
+      // last few samples before regular input gets passed through
+      out = momentaryCrossfade.Process(in, pitchOut);
     } else {
       m_sampleCounter = 0;
+      momentaryCrossfade.SetPos(0.0f);
     }
   }
+
   m_audioRight = m_audioLeft = out;
 }
 
