@@ -147,9 +147,11 @@ void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
   } else if (parameter_id == 4) {  // Change IR
     SelectIR();
   } else if (parameter_id == 5) {  // IR Enabled
-    m_irEnabled = GetParameterAsBool(5);
+    // TODO SK: why is this flipped?
+    m_irEnabled = !GetParameterAsBool(5);
   } else if (parameter_id == 6) {  // Amp Enabled
-    m_ampEnabled = GetParameterAsBool(6);
+    // TODO SK: why is this flipped?
+    m_ampEnabled = !GetParameterAsBool(6);
   }
 }
 
