@@ -23,8 +23,6 @@ static const char* s_modelBinNames[8] = {
     "H&K Clean", "Bassman",   "5150", "Splawn",
 };
 
-static const char* s_OffOnBinNames[2] = {"OFF", "ON"};
-
 static const int s_paramCount = 7;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
@@ -71,18 +69,14 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
     {
       name : "IR Enabled",
-      valueType : ParameterValueType::Binned,
-      valueBinCount : 2,
-      valueBinNames : s_OffOnBinNames,
+      valueType : ParameterValueType::Bool,
       defaultValue : 0,
       knobMapping : 5,
       midiCCMapping : -1
     },
     {
       name : "Amp Enabled",
-      valueType : ParameterValueType::Binned,
-      valueBinCount : 2,
-      valueBinNames : s_OffOnBinNames,
+      valueType : ParameterValueType::Bool,
       defaultValue : 127,
       knobMapping : -1,
       midiCCMapping : -1
@@ -153,9 +147,9 @@ void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
   } else if (parameter_id == 4) {  // Change IR
     SelectIR();
   } else if (parameter_id == 5) {  // IR Enabled
-    m_irEnabled = GetParameterAsBinnedValue(5) == 2;
+    m_irEnabled = GetParameterAsBool(5);
   } else if (parameter_id == 6) {  // Amp Enabled
-    m_ampEnabled = GetParameterAsBinnedValue(6) == 2;
+    m_ampEnabled = GetParameterAsBool(6);
   }
 }
 
