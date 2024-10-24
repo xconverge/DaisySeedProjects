@@ -189,10 +189,6 @@ static void AudioCallback(AudioHandle::InputBuffer in,
       }
     }
 
-    const bool effectUsesAlternateFootswitch =
-        (std::string(activeEffect->GetName()) != "Looper" &&
-         std::string(activeEffect->GetName()) != "Pitch");
-
     if (switchPressed) {
       // Note that switch is pressed and reset the IdleTimer for detecting
       // double presses
@@ -204,7 +200,7 @@ static void AudioCallback(AudioHandle::InputBuffer in,
         // Register as Tap Tempo if Switch ID matched preferred mapping for
         // TapTempo
 
-        if (!effectUsesAlternateFootswitch &&
+        if (!activeEffect->UsesAlternateFootswitch() &&
             i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
                      SpecialFunctionType::TapTempo)) {
           needToChangeTempo = true;

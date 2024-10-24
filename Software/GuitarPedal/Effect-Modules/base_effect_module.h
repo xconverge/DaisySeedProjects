@@ -275,6 +275,7 @@ class BaseEffectModule {
   */
   virtual void MidiCCValueNotification(uint8_t control_num, uint8_t value);
 
+  virtual bool UsesAlternateFootswitch() { return false; }
   virtual void AlternateFootswitchPressed() {};
   virtual void AlternateFootswitchReleased() {};
   virtual void AlternateFootswitchHeldFor1Second() {};
