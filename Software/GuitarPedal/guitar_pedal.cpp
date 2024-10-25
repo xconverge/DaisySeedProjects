@@ -155,6 +155,13 @@ static void AudioCallback(AudioHandle::InputBuffer in,
   // Process the switches
   for (int i = 0; i < hardware.GetSwitchCount(); i++) {
     bool switchPressed = hardware.switches[i].RisingEdge();
+
+    // Find which hardware switch is mapped to the Effect On/Off Bypass function
+    if (i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
+                 SpecialFunctionType::Bypass)) {
+      effectOn ^= switchPressed;
+    }
+
     if (switchPressed &&
         i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
                  SpecialFunctionType::Alternate)) {
@@ -172,12 +179,6 @@ static void AudioCallback(AudioHandle::InputBuffer in,
     if (switchHeld && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
                                SpecialFunctionType::Alternate)) {
       activeEffect->AlternateFootswitchHeldFor1Second();
-    }
-
-    // Find which hardware switch is mapped to the Effect On/Off Bypass function
-    if (i == hardware.GetPreferredSwitchIDForSpecialFunctionType(
-                 SpecialFunctionType::Bypass)) {
-      effectOn ^= switchPressed;
     }
 
     if (switchEnabledCache[i] == true) {
