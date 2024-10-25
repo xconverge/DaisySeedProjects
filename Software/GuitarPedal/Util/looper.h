@@ -1,4 +1,3 @@
-
 /*
 Copyright (c) 2020 Electrosmith, Corp
 
@@ -220,10 +219,10 @@ class Looper {
   inline void SetHalfSpeed(bool state) { half_speed_ = state; }
   inline bool GetHalfSpeed() const { return half_speed_; }
 
-  inline bool IsNearBeginning() { return near_beginning_; }
+  inline bool IsNearBeginning() const { return near_beginning_; }
 
-  inline float GetPos() { return pos_; }
-  inline size_t GetRecSize() { return recsize_; }
+  inline float GetPos() const { return pos_; }
+  inline size_t GetRecSize() const { return recsize_; }
 
  private:
   /** Constants */
