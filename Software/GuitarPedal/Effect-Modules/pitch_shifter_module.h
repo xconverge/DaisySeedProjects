@@ -24,7 +24,7 @@ class PitchShifterModule : public BaseEffectModule {
   void ProcessStereo(float inL, float inR) override;
   void ParameterChanged(int parameter_id) override;
 
-  bool UsesAlternateFootswitch() override { return true; }
+  bool AlternateFootswitchForTempo() const override { return false; }
   void AlternateFootswitchPressed() override;
   void AlternateFootswitchReleased() override;
 

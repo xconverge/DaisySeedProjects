@@ -24,7 +24,7 @@ class LooperModule : public BaseEffectModule {
   void ProcessMono(float in) override;
   void ProcessStereo(float inL, float inR) override;
   float GetBrightnessForLED(int led_id) override;
-  bool UsesAlternateFootswitch() override { return true; }
+  bool AlternateFootswitchForTempo() const override { return false; }
   void AlternateFootswitchPressed() override;
   void AlternateFootswitchHeldFor1Second() override;
   void DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
