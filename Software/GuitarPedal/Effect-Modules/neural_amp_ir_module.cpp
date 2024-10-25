@@ -135,6 +135,9 @@ void NeuralAmpIRModule::Init(float sample_rate) {
   SelectModel();
   SelectIR();
 
+  m_irEnabled = GetParameterAsBool(5);
+  m_ampEnabled = GetParameterAsBool(6);
+
   m_tone.Init(sample_rate);
   CalculateTone();
 }
@@ -147,11 +150,9 @@ void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
   } else if (parameter_id == 4) {  // Change IR
     SelectIR();
   } else if (parameter_id == 5) {  // IR Enabled
-    // TODO SK: why is this flipped?
-    m_irEnabled = !GetParameterAsBool(5);
+    m_irEnabled = GetParameterAsBool(5);
   } else if (parameter_id == 6) {  // Amp Enabled
-    // TODO SK: why is this flipped?
-    m_ampEnabled = !GetParameterAsBool(6);
+    m_ampEnabled = GetParameterAsBool(6);
   }
 }
 
