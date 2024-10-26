@@ -67,13 +67,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 // Fixed loud noise at startup (First time after power cycle) by NOT
 // putting this in DSY_SDRAM_BSS
 static daisysp_modified::PitchShifter pitchShifter;
-
 static CrossFade pitchCrossfade;
-static CrossFade momentaryCrossfade;
-
-// Crossfade between the non pitch shifted and pitch shifted signal when using
-// momentary mode
-constexpr uint32_t momentarySamplesToCrossfade = 480;
 
 // Default Constructor
 PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
@@ -96,9 +90,6 @@ void PitchShifterModule::Init(float sample_rate) {
 
   pitchCrossfade.Init(CROSSFADE_CPOW);
   pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
-
-  momentaryCrossfade.Init(CROSSFADE_CPOW);
-  momentaryCrossfade.SetPos(0.0f);
 
   m_latching = GetParameterAsBinnedValue(3) == 1;
 
@@ -189,11 +180,14 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
       // Make sure the crossfader is initialized and the sample counter is
       // ready for the next ramp up transition time
       m_sampleCounter = 0;
-      momentaryCrossfade.SetPos(0.0f);
 
       // Return the input directly since the switch isn't pressed and we aren't
       // ramping down
-      return in;
+
+      // Process the pitch shift as usual
+      float shifted = pitchShifter.Process(in);
+      float out = pitchCrossfade.Process(in, shifted);
+      return out;
     }
   }
 
@@ -218,17 +212,6 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
   float shifted = pitchShifter.Process(in);
   float pitchOut = pitchCrossfade.Process(in, shifted);
 
-  // Set the crossfader used for the short transition around when pitch
-  // shifting is starting/stopping (only momentarySamplesToCrossfade duration
-  // long)
-  if (m_percentageComplete >= 1.0f) {
-    // Finished transitioning so just set the crossfader completely to 100%
-    momentaryCrossfade.SetPos(1.0f);
-  } else if (m_sampleCounter <= momentarySamplesToCrossfade) {
-    momentaryCrossfade.SetPos((float)m_sampleCounter /
-                              (float)momentarySamplesToCrossfade);
-  }
-
   const bool transitioningTowardsSemitoneTarget = m_alternateFootswitchPressed;
 
   // Increment or decrement the counter for the next pass through based on if we
@@ -239,10 +222,5 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
     m_sampleCounter -= 1;
   }
 
-  // Add crossfade to avoid popping sound if this is one of the
-  // last few samples before regular input gets passed through (ramp up/ramp
-  // down period)
-  float out = momentaryCrossfade.Process(in, pitchOut);
-
-  return out;
+  return pitchOut;
 }
