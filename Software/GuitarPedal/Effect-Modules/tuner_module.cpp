@@ -6,37 +6,20 @@
 
 #include "q/fx/lowpass.hpp"
 
-using namespace cycfi::q;
-
-float sample_rate = 48000;
-
-// The frequency detection bounds;
-frequency lowest_frequency = pitch_names::C[2];
-frequency highest_frequency = pitch_names::C[5];
-
-// The pitch detector
-pitch_detector pd{lowest_frequency, highest_frequency, sample_rate,
-                  lin_to_db(0)};
-
-// The pitch detector pre-processor
-signal_conditioner::config preprocessor_config;
-signal_conditioner preprocessor{preprocessor_config, lowest_frequency,
-                                highest_frequency, sample_rate};
-
 using namespace bkshepherd;
 
 using namespace daisy;
 using namespace daisysp;
+using namespace cycfi::q;
 
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
 
 const uint16_t k_screenWidth = 128;
 
-static const int s_paramCount = 0;
-static const ParameterMetaData s_metaData[s_paramCount] = {};
+static const ParameterMetaData s_metaData[0] = {};
 
-cycfi::q::dynamic_smoother smoothingFilter{0.3, 48000};
+dynamic_smoother smoothingFilter{0.3, 48000};
 
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule() {
@@ -44,16 +27,33 @@ TunerModule::TunerModule() : BaseEffectModule() {
   m_paramMetaData = s_metaData;
 
   // Initialize Parameters for this Effect
-  this->InitParams(s_paramCount);
+  this->InitParams(0);
 
   m_name = "TuneQ";
 }
 
 // Destructor
-TunerModule::~TunerModule() {}
+TunerModule::~TunerModule() {
+  delete m_pitchDetector;
+  m_pitchDetector = nullptr;
+
+  delete m_preProcessor;
+  m_preProcessor = nullptr;
+}
 
 void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
+
+  // The frequency detection bounds;
+  frequency lowest_frequency = pitch_names::C[2];
+  frequency highest_frequency = pitch_names::C[5];
+
+  m_pitchDetector = new pitch_detector{lowest_frequency, highest_frequency,
+                                       sample_rate, lin_to_db(0)};
+
+  signal_conditioner::config preprocessor_config;
+  m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency,
+                                          highest_frequency, sample_rate};
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -71,18 +71,17 @@ uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 void TunerModule::ProcessMono(float in) {
   // Run the detector
   // Pre-process the signal for pitch detection
-  float pd_sig = preprocessor(in);
+  float pd_sig = m_preProcessor->operator()(in);
 
   // send the processed sample through the pitch detector
-  pd(pd_sig);
-  m_currentFrequency = as_float(frequency{pd.get_frequency()});
+  m_pitchDetector->operator()(pd_sig);
+  m_currentFrequency = as_float(frequency{m_pitchDetector->get_frequency()});
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = smoothingFilter(m_currentFrequency);
+  // m_currentFrequency = smoothingFilter(m_currentFrequency);
 
   m_note = Note(m_currentFrequency);
   m_octave = Octave(m_currentFrequency);
-
   m_cents = Cents(m_currentFrequency, m_note);
 }
 
