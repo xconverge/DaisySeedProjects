@@ -4,8 +4,6 @@
 
 using namespace bkshepherd;
 
-const uint16_t k_screenWidth = 128;
-
 // 60 seconds at 48kHz
 #define kBuffSize 48000 * 60
 

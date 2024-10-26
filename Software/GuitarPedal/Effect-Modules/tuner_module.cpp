@@ -14,8 +14,6 @@ using namespace cycfi::q;
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
 
-const uint16_t k_screenWidth = 128;
-
 static const ParameterMetaData s_metaData[0] = {};
 
 // Default Constructor
