@@ -5,11 +5,11 @@ url = https://github.com/electro-smith/DaisySP.git
 path = Software/GuitarPedal/libDaisy
 url = https://github.com/electro-smith/libDaisy.git
 [submodule "Software/GuitarPedal/RTNeural"]
-	path = Software/GuitarPedal/RTNeural
-	url = git@github.com:jatinchowdhury18/RTNeural.git
+path = Software/GuitarPedal/RTNeural
+url = git@github.com:jatinchowdhury18/RTNeural.git
 [submodule "Software/GuitarPedal/q"]
-	path = Software/GuitarPedal/q
-	url = git@github.com:cycfi/q.git
+path = Software/GuitarPedal/q/q
+url = git@github.com:cycfi/q.git
 [submodule "Software/GuitarPedal/infra"]
-	path = Software/GuitarPedal/infra
-	url = git@github.com:cycfi/infra.git
+path = Software/GuitarPedal/q/infra
+url = git@github.com:cycfi/infra.git

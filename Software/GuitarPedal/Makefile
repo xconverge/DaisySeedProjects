@@ -28,7 +28,7 @@ SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
 
 # RT Neural lib
-C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen -I./q/q_lib/include -I./infra/include
+C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen -I./q/q/q_lib/include -I./q/infra/include
 CPPFLAGS += -DRTNEURAL_DEFAULT_ALIGNMENT=8 -DRTNEURAL_NO_DEBUG=1
 
 LDFLAGS += -u _printf_float
