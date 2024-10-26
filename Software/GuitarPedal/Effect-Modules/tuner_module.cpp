@@ -104,7 +104,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
                              Alignment::topCentered, true);
 
   // This has to be an odd number so the middle block is "in tune"
-  const uint8_t blockCount = 11;
+  const uint8_t blockCount = 15;
   const uint8_t inTuneBlockIndex = (blockCount - 1) / 2;
   const uint8_t numBlocksOutOfTune = (blockCount - 1) / 2;
 
@@ -114,7 +114,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
 
   // 0 is in tune, 1.0f is max out of tune we display, cents sign is used to
   // determine sharp or flat
-  float percentage = m_cents / farLimit;
+  float percentage = std::abs(m_cents) / farLimit;
   percentage = std::clamp(percentage, 0.0f, 1.0f);
 
   const uint8_t numBlocksOutOfTuneToDisplay =
