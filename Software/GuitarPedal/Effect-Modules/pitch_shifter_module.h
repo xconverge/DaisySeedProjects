@@ -29,6 +29,8 @@ class PitchShifterModule : public BaseEffectModule {
   void AlternateFootswitchReleased() override;
 
  private:
+  float ProcessMomentaryMode(float in);
+
   bool m_latching = true;
   bool m_directionDown = true;
   bool m_alternateFootswitchPressed = false;

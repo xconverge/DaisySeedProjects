@@ -13,7 +13,8 @@ static const char* s_directionBinNames[2] = {"DOWN", "UP"};
 static const char* s_modeBinNames[2] = {"LATCH", "MOMENT"};
 
 // How many samples to delay to based on the "Delay" knob and parameter
-// when the time knob is set to max
+// when the time knob is set to max, this is used for the ramp up/down
+// transition when in momentary mode. Has no effect on latching mode
 const uint32_t k_maxSamplesMaxTime = 48000 * 2;
 
 static const int s_paramCount = 5;
@@ -69,7 +70,10 @@ static daisysp_modified::PitchShifter pitchShifter;
 
 static CrossFade pitchCrossfade;
 static CrossFade momentaryCrossfade;
-constexpr uint32_t momentarySamplesToCrossfade = 4800;
+
+// Crossfade between the non pitch shifted and pitch shifted signal when using
+// momentary mode
+constexpr uint32_t momentarySamplesToCrossfade = 480;
 
 // Default Constructor
 PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
@@ -130,80 +134,32 @@ void PitchShifterModule::ParameterChanged(int parameter_id) {
 
 void PitchShifterModule::AlternateFootswitchPressed() {
   m_alternateFootswitchPressed = true;
+
+  if (!m_latching && m_sampleCounter == 0) {
+    // Initiate the ramp up transition for momentary mode
+    m_sampleCounter += 1;
+  }
 }
 
 void PitchShifterModule::AlternateFootswitchReleased() {
   m_alternateFootswitchPressed = false;
+
+  if (!m_latching && m_sampleCounter > 0) {
+    // Initiate the ramp down transition for momentary mode
+    m_sampleCounter -= 1;
+  }
 }
 
 void PitchShifterModule::ProcessMono(float in) {
-  BaseEffectModule::ProcessMono(in);
   float out = in;
+
   if (m_latching) {
+    // When in latching mode, just process the target semitone at all times
+    // immediately
     float shifted = pitchShifter.Process(in);
     out = pitchCrossfade.Process(in, shifted);
   } else {
-    const uint32_t samplesToDelay =
-        (float)k_maxSamplesMaxTime * (float)m_delayValue;
-
-    if (m_alternateFootswitchPressed) {
-      if (m_delayValue > 0) {
-        m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
-      } else {
-        m_percentageComplete = 1.0f;
-      }
-
-      m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
-
-      pitchShifter.SetTransposition(m_semitoneTarget * m_percentageComplete);
-      float shifted = pitchShifter.Process(in);
-      float pitchOut = pitchCrossfade.Process(in, shifted);
-
-      if (m_percentageComplete >= 1.0f) {
-        momentaryCrossfade.SetPos(1.0f);
-      } else if (m_sampleCounter <= momentarySamplesToCrossfade) {
-        momentaryCrossfade.SetPos((float)m_sampleCounter /
-                                  (float)momentarySamplesToCrossfade);
-      }
-
-      if (m_sampleCounter < samplesToDelay) {
-        m_sampleCounter += 1;
-      }
-
-      // Add crossfade to avoid popping sound if this is one of the
-      // first few samples coming from a regular passed through input signal
-      out = momentaryCrossfade.Process(in, pitchOut);
-    } else if (!m_alternateFootswitchPressed && m_sampleCounter > 0) {
-      if (m_delayValue > 0) {
-        m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
-      } else {
-        m_percentageComplete = 1.0f;
-      }
-
-      m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
-
-      pitchShifter.SetTransposition(m_semitoneTarget * m_percentageComplete);
-      float shifted = pitchShifter.Process(in);
-      float pitchOut = pitchCrossfade.Process(in, shifted);
-
-      if (m_sampleCounter > 0) {
-        m_sampleCounter -= 1;
-      }
-
-      if (m_percentageComplete >= 1.0f) {
-        momentaryCrossfade.SetPos(1.0f);
-      } else if (m_sampleCounter <= momentarySamplesToCrossfade) {
-        momentaryCrossfade.SetPos((float)m_sampleCounter /
-                                  (float)momentarySamplesToCrossfade);
-      }
-
-      // Add crossfade to avoid popping sound if this is one of the
-      // last few samples before regular input gets passed through
-      out = momentaryCrossfade.Process(in, pitchOut);
-    } else {
-      m_sampleCounter = 0;
-      momentaryCrossfade.SetPos(0.0f);
-    }
+    out = ProcessMomentaryMode(in);
   }
 
   m_audioRight = m_audioLeft = out;
@@ -211,4 +167,82 @@ void PitchShifterModule::ProcessMono(float in) {
 
 void PitchShifterModule::ProcessStereo(float inL, float inR) {
   ProcessMono(inL);
+}
+
+float PitchShifterModule::ProcessMomentaryMode(float in) {
+  // Are we still in the middle or starting a "ramp up/ramp down
+  // period" where we are transitioning to/from a target semitone
+  const bool transitioning = m_sampleCounter > 0;
+
+  // ---- Process when NOT in a ramp up/ramp down state ----
+  if (!transitioning) {
+    if (m_alternateFootswitchPressed) {
+      // If the footswitch IS pressed, we maintain the m_sampleCounter value
+      // where it was to use for the ramp down
+
+      // Process the pitch shift as usual
+      float shifted = pitchShifter.Process(in);
+      float out = pitchCrossfade.Process(in, shifted);
+      return out;
+    } else {
+      // If the footswitch isn't pressed, reset values for next ramp up
+      // Make sure the crossfader is initialized and the sample counter is
+      // ready for the next ramp up transition time
+      m_sampleCounter = 0;
+      momentaryCrossfade.SetPos(0.0f);
+
+      // Return the input directly since the switch isn't pressed and we aren't
+      // ramping down
+      return in;
+    }
+  }
+
+  // ---- Process ramp up/ramp down transition ----
+
+  // When in momentary mode, there is a ramp up(pressed)/ramp down(released)
+  // transition of the semitone based on the "delay" parameter
+  const uint32_t samplesToDelay = static_cast<uint32_t>(
+      static_cast<float>(k_maxSamplesMaxTime) * m_delayValue);
+
+  if (samplesToDelay > 0) {
+    m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
+
+    // Clamp just to make sure we don't overshoot the semitone just in case
+    m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
+  } else {
+    m_percentageComplete = 1.0f;
+  }
+
+  // Perform the pitch shift
+  pitchShifter.SetTransposition(m_semitoneTarget * m_percentageComplete);
+  float shifted = pitchShifter.Process(in);
+  float pitchOut = pitchCrossfade.Process(in, shifted);
+
+  // Set the crossfader used for the short transition around when pitch
+  // shifting is starting/stopping (only momentarySamplesToCrossfade duration
+  // long)
+  if (m_percentageComplete >= 1.0f) {
+    // Finished transitioning so just set the crossfader completely to 100%
+    momentaryCrossfade.SetPos(1.0f);
+  } else if (m_sampleCounter <= momentarySamplesToCrossfade) {
+    momentaryCrossfade.SetPos((float)m_sampleCounter /
+                              (float)momentarySamplesToCrossfade);
+  }
+
+  const bool transitioningTowardsSemitoneTarget = m_alternateFootswitchPressed;
+
+  // Increment or decrement the counter for the next pass through based on if we
+  // are ramping up or ramping down and complete or not
+  if (transitioningTowardsSemitoneTarget && m_sampleCounter < samplesToDelay) {
+    m_sampleCounter += 1;
+  } else if (!transitioningTowardsSemitoneTarget && m_sampleCounter > 0) {
+    m_sampleCounter -= 1;
+  }
+
+  // Add crossfade to avoid popping sound if this is one of the
+  // last few samples before regular input gets passed through (ramp up/ramp
+  // down period)
+  float out = momentaryCrossfade.Process(in, pitchOut);
+
+  return out;
 }
