@@ -4,7 +4,6 @@
 
 #include <stdint.h>
 
-#include "../Util/frequency_detector_q.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
 #ifdef __cplusplus
@@ -30,7 +29,6 @@ class TunerModule : public BaseEffectModule {
  private:
   float m_currentFrequency = 0;
 
-  FrequencyDetectorQ m_frequencyDetector;
   uint8_t m_note = 0;
   uint8_t m_octave = 0;
   float m_cents = 0;

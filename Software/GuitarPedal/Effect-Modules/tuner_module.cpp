@@ -1,6 +1,27 @@
 #include "tuner_module.h"
 
+#include <q/fx/signal_conditioner.hpp>
+#include <q/pitch/pitch_detector.hpp>
+#include <q/support/pitch_names.hpp>
+
 #include "q/fx/lowpass.hpp"
+
+using namespace cycfi::q;
+
+float sample_rate = 48000;
+
+// The frequency detection bounds;
+frequency lowest_frequency = pitch_names::C[2];
+frequency highest_frequency = pitch_names::C[5];
+
+// The pitch detector
+pitch_detector pd{lowest_frequency, highest_frequency, sample_rate,
+                  lin_to_db(0)};
+
+// The pitch detector pre-processor
+signal_conditioner::config preprocessor_config;
+signal_conditioner preprocessor{preprocessor_config, lowest_frequency,
+                                highest_frequency, sample_rate};
 
 using namespace bkshepherd;
 
@@ -33,8 +54,6 @@ TunerModule::~TunerModule() {}
 
 void TunerModule::Init(float sample_rate) {
   BaseEffectModule::Init(sample_rate);
-
-  m_frequencyDetector.Init(sample_rate);
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -51,10 +70,15 @@ uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 
 void TunerModule::ProcessMono(float in) {
   // Run the detector
-  m_frequencyDetector.Process(in);
+  // Pre-process the signal for pitch detection
+  float pd_sig = preprocessor(in);
+
+  // send the processed sample through the pitch detector
+  pd(pd_sig);
+  m_currentFrequency = as_float(frequency{pd.get_frequency()});
 
   // Try to get the latest frequency from the detector
-  m_currentFrequency = smoothingFilter(m_frequencyDetector.GetFrequency());
+  m_currentFrequency = smoothingFilter(m_currentFrequency);
 
   m_note = Note(m_currentFrequency);
   m_octave = Octave(m_currentFrequency);
