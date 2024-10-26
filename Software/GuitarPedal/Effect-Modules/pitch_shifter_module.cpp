@@ -4,9 +4,6 @@
 
 using namespace bkshepherd;
 
-using namespace daisy;
-using namespace daisysp;
-
 static const char* s_semitoneBinNames[8] = {"0", "1", "2", "3",
                                             "4", "5", "6", "7"};
 static const char* s_directionBinNames[2] = {"DOWN", "UP"};
@@ -67,7 +64,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 // Fixed loud noise at startup (First time after power cycle) by NOT
 // putting this in DSY_SDRAM_BSS
 static daisysp_modified::PitchShifter pitchShifter;
-static CrossFade pitchCrossfade;
+static daisysp::CrossFade pitchCrossfade;
 
 // Default Constructor
 PitchShifterModule::PitchShifterModule() : BaseEffectModule() {
