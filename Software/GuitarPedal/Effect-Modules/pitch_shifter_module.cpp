@@ -1,6 +1,7 @@
 #include "pitch_shifter_module.h"
 
 #include "../Util/pitch_shifter.h"
+#include "daisysp.h"
 
 using namespace bkshepherd;
 

@@ -5,12 +5,9 @@
 #include <stdint.h>
 
 #include "base_effect_module.h"
-#include "daisysp.h"
 #ifdef __cplusplus
 
-/** @file tuner_module.h */
-
-using namespace daisysp;
+/** @file pitch_shifter_module.h */
 
 namespace bkshepherd {
 

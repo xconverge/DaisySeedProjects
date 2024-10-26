@@ -11,6 +11,8 @@
 #include "Utility/dsp.h"
 #include "phasor.h"
 
+using namespace daisysp;
+
 namespace daisysp_modified {
 static inline uint32_t hash_xs32(uint32_t x) {
   x ^= x << 13;
