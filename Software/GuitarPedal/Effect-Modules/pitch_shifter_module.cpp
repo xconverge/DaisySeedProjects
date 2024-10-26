@@ -202,13 +202,14 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
   }
 
   // ---- Process ramp up/ramp down transition ----
-  m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
 
   // Clamp just to make sure we don't overshoot the semitone just in case
-  m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
+  const float percentageComplete = std::clamp(
+      static_cast<float>(m_sampleCounter) / static_cast<float>(samplesToDelay),
+      0.0f, 1.0f);
 
   // Perform the pitch shift
-  pitchShifter.SetTransposition(m_semitoneTarget * m_percentageComplete);
+  pitchShifter.SetTransposition(m_semitoneTarget * percentageComplete);
   float shifted = pitchShifter.Process(in);
   float pitchOut = pitchCrossfade.Process(in, shifted);
 
