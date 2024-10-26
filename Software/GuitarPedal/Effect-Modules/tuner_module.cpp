@@ -16,7 +16,6 @@ static const int s_paramCount = 0;
 static const ParameterMetaData s_metaData[s_paramCount] = {};
 
 cycfi::q::dynamic_smoother smoothingFilter{0.3, 48000};
-cycfi::q::dynamic_smoother smoothingFilter2{0.3, 48000};
 
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule() {
@@ -68,44 +67,58 @@ void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
 void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
                          int numItemsTotal, Rectangle boundsToDrawIn,
                          bool isEditing) {
-  BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn,
-                           isEditing);
-  uint16_t center = boundsToDrawIn.GetHeight() / 2;
-
   char currentNote[12];
   sprintf(currentNote, "%s%u", k_notes[m_note % 12], m_octave);
 
+  char strbuffNote[64];
+  sprintf(strbuffNote, "%s", currentNote);
+  display.WriteStringAligned(strbuffNote, Font_16x26, boundsToDrawIn,
+                             Alignment::topCentered, true);
+
+  // Thresholds for tuning accuracy mapping to blocks
   const float close = 1.0f;
   const float medium = 3.0f;
   const float far = 10.0f;
 
-  char strbuff[64];
+  const int blockCount = 7;
+  bool blockActive[blockCount] = {false};
+
+  blockActive[3] = true;
 
   if (m_cents < -far) {
-    sprintf(strbuff, "ooo %s    ", currentNote);
+    blockActive[0] = true;
+    blockActive[1] = true;
+    blockActive[2] = true;
   } else if (m_cents < -medium) {
-    sprintf(strbuff, " oo %s    ", currentNote);
+    blockActive[1] = true;
+    blockActive[2] = true;
   } else if (m_cents < -close) {
-    sprintf(strbuff, "  o %s    ", currentNote);
+    blockActive[2] = true;
   } else if (m_cents > far) {
-    sprintf(strbuff, "    %s ooo", currentNote);
+    blockActive[4] = true;
+    blockActive[5] = true;
+    blockActive[6] = true;
   } else if (m_cents > medium) {
-    sprintf(strbuff, "    %s oo ", currentNote);
+    blockActive[4] = true;
+    blockActive[5] = true;
   } else if (m_cents > close) {
-    sprintf(strbuff, "    %s o  ", currentNote);
-  } else {
-    sprintf(strbuff, "   [%s]   ", currentNote);
+    blockActive[4] = true;
   }
 
-  display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
-                             Alignment::centered, true);
+  int width = boundsToDrawIn.GetWidth();
+  int blockWidth = (width / blockCount);
+  int top = 30;
 
-  char strbuffCents[64];
-  sprintf(strbuffCents, "%.2f", m_cents);
-  display.WriteStringAligned(strbuffCents, Font_11x18, boundsToDrawIn,
-                             Alignment::topCentered, true);
+  int x = 0;
+  // Draw all of the active blocks
+  for (int block = 0; block < blockCount; block++) {
+    Rectangle r(x, top, blockWidth, blockWidth);
+    display.DrawRect(r, true, blockActive[block]);
+    x += blockWidth;
+  }
+
   char strbuffFreq[64];
   sprintf(strbuffFreq, "%.2f", m_currentFrequency);
-  display.WriteStringAligned(strbuffFreq, Font_11x18, boundsToDrawIn,
+  display.WriteStringAligned(strbuffFreq, Font_7x10, boundsToDrawIn,
                              Alignment::bottomCentered, true);
 }
