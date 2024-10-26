@@ -113,7 +113,6 @@ void PitchShifterModule::ParameterChanged(int parameter_id) {
     } else {
       m_semitoneTarget = (GetParameterAsBinnedValue(0) - 1);
     }
-    pitchShifter.SetTransposition(m_semitoneTarget);
   } else if (parameter_id == 1) {
     pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
   } else if (parameter_id == 3) {
@@ -121,6 +120,10 @@ void PitchShifterModule::ParameterChanged(int parameter_id) {
   } else if (parameter_id == 4) {
     m_delayValue = GetParameterAsMagnitude(4);
   }
+
+  // Parameters changed, reset the transposition target just in case (mostly
+  // impacts momentary/latch and delay)
+  pitchShifter.SetTransposition(m_semitoneTarget);
 }
 
 void PitchShifterModule::AlternateFootswitchPressed() {
@@ -161,9 +164,14 @@ void PitchShifterModule::ProcessStereo(float inL, float inR) {
 }
 
 float PitchShifterModule::ProcessMomentaryMode(float in) {
+  // When in momentary mode, there is a ramp up(pressed)/ramp down(released)
+  // transition of the semitone based on the "delay" parameter
+  const uint32_t samplesToDelay = static_cast<uint32_t>(
+      static_cast<float>(k_maxSamplesMaxTime) * m_delayValue);
+
   // Are we still in the middle or starting a "ramp up/ramp down
   // period" where we are transitioning to/from a target semitone
-  const bool transitioning = m_sampleCounter > 0;
+  const bool transitioning = m_sampleCounter > 0 && samplesToDelay > 0;
 
   // ---- Process when NOT in a ramp up/ramp down state ----
   if (!transitioning) {
@@ -171,7 +179,8 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
       // If the footswitch IS pressed, we maintain the m_sampleCounter value
       // where it was to use for the ramp down
 
-      // Process the pitch shift as usual
+      // Process the pitch shift for completely active to the target
+      pitchShifter.SetTransposition(m_semitoneTarget);
       float shifted = pitchShifter.Process(in);
       float out = pitchCrossfade.Process(in, shifted);
       return out;
@@ -184,7 +193,8 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
       // Return the input directly since the switch isn't pressed and we aren't
       // ramping down
 
-      // Process the pitch shift as usual
+      // Process the pitch shift for completely inactive (0)
+      pitchShifter.SetTransposition(0);
       float shifted = pitchShifter.Process(in);
       float out = pitchCrossfade.Process(in, shifted);
       return out;
@@ -192,20 +202,10 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
   }
 
   // ---- Process ramp up/ramp down transition ----
+  m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
 
-  // When in momentary mode, there is a ramp up(pressed)/ramp down(released)
-  // transition of the semitone based on the "delay" parameter
-  const uint32_t samplesToDelay = static_cast<uint32_t>(
-      static_cast<float>(k_maxSamplesMaxTime) * m_delayValue);
-
-  if (samplesToDelay > 0) {
-    m_percentageComplete = (float)m_sampleCounter / (float)samplesToDelay;
-
-    // Clamp just to make sure we don't overshoot the semitone just in case
-    m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
-  } else {
-    m_percentageComplete = 1.0f;
-  }
+  // Clamp just to make sure we don't overshoot the semitone just in case
+  m_percentageComplete = std::clamp(m_percentageComplete, 0.0f, 1.0f);
 
   // Perform the pitch shift
   pitchShifter.SetTransposition(m_semitoneTarget * m_percentageComplete);
@@ -214,8 +214,8 @@ float PitchShifterModule::ProcessMomentaryMode(float in) {
 
   const bool transitioningTowardsSemitoneTarget = m_alternateFootswitchPressed;
 
-  // Increment or decrement the counter for the next pass through based on if we
-  // are ramping up or ramping down and complete or not
+  // Increment or decrement the counter for the next pass through based on if
+  // we are ramping up or ramping down and complete or not
   if (transitioningTowardsSemitoneTarget && m_sampleCounter < samplesToDelay) {
     m_sampleCounter += 1;
   } else if (!transitioningTowardsSemitoneTarget && m_sampleCounter > 0) {
