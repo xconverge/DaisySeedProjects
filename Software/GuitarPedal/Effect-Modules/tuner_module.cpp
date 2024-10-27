@@ -1,6 +1,5 @@
 #include "tuner_module.h"
 
-#include <q/fx/lowpass.hpp>
 #include <q/fx/signal_conditioner.hpp>
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
@@ -18,7 +17,7 @@ using namespace cycfi::q;
 // Cutoff Freq
 // Beta: 0.0f disables it entirely, but used for scaling cutoff frequency
 // Derivative cutoff freq: used when beta is > 0
-one_euro_filter<float, float> smoothingFilter{48000, 0.2f, 0.1f, 0.8f};
+one_euro_filter<float, float> smoothingFilter{48000, 0.5f, 0.05f, 1.0f};
 
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
@@ -114,6 +113,9 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
 
   // Thresholds for tuning accuracy mapping to blocks
   const float closeThreshold = 1.0f;
+
+  // Nearly half a semitone so that it switches to the sharp or flat version of
+  // the next note after the last block is active
   const float farLimit = 45.0f;
 
   // 0 is in tune, 1.0f is max out of tune we display, cents sign is used to
