@@ -28,7 +28,7 @@ TunerModule::TunerModule() : BaseEffectModule() {
   // Initialize Parameters for this Effect
   this->InitParams(0);
 
-  m_name = "TuneQ";
+  m_name = "Tuner";
 }
 
 // Destructor
