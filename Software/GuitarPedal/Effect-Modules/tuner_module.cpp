@@ -1,7 +1,6 @@
 #include "tuner_module.h"
 
 #include <q/fx/lowpass.hpp>
-#include <q/fx/moving_average.hpp>
 #include <q/fx/signal_conditioner.hpp>
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
@@ -14,9 +13,7 @@ using namespace daisy;
 using namespace daisysp;
 using namespace cycfi::q;
 
-// one_euro_filter<float, double> smoothingFilter{48000, 0.5, 0, 0.1};
-
-// cycfi::q::basic_moving_average<float> smoothingFilter{48};
+one_euro_filter smoothingFilter{48000, 0.5, 0.1, 0.1};
 
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
@@ -41,9 +38,6 @@ TunerModule::~TunerModule() {
 
   delete m_preProcessor;
   m_preProcessor = nullptr;
-
-  delete m_smoothingFilter;
-  m_smoothingFilter = nullptr;
 }
 
 void TunerModule::Init(float sample_rate) {
@@ -59,8 +53,6 @@ void TunerModule::Init(float sample_rate) {
   signal_conditioner::config preprocessor_config;
   m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency,
                                           highest_frequency, sample_rate};
-
-  m_smoothingFilter = new dynamic_smoother{20, sample_rate};
 }
 
 float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
@@ -87,13 +79,11 @@ void TunerModule::ProcessMono(float in) {
     const float freq = m_pitchDetector->get_frequency();
 
     // Run a smoothing filter on the detected frequency
-    m_currentFrequency = m_smoothingFilter->operator()(freq);
+    double currentTimeInSeconds =
+        static_cast<double>(System::GetNow()) / static_cast<double>(1000);
+    double filteredFreq = smoothingFilter(freq, currentTimeInSeconds);
 
-    // double timestamp =
-    //     static_cast<double>(System::GetNow()) / static_cast<double>(1000);
-    // m_currentFrequency = smoothingFilter(freq, timestamp);
-
-    // m_currentFrequency = smoothingFilter(freq);
+    m_currentFrequency = filteredFreq;
   }
 
   m_note = Note(m_currentFrequency);
