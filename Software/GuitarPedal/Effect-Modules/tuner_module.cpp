@@ -98,13 +98,17 @@ void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
 void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
                          int numItemsTotal, Rectangle boundsToDrawIn,
                          bool isEditing) {
-  char currentNote[12];
-  sprintf(currentNote, "%s", k_notes[m_note % 12]);
+  const bool displayTuning = m_currentFrequency > 0;
 
-  char strbuffNote[64];
-  sprintf(strbuffNote, "%s", currentNote);
-  display.WriteStringAligned(strbuffNote, Font_16x26, boundsToDrawIn,
-                             Alignment::topCentered, true);
+  if (displayTuning) {
+    char currentNote[12];
+    sprintf(currentNote, "%s", k_notes[m_note % 12]);
+
+    char strbuffNote[64];
+    sprintf(strbuffNote, "%s", currentNote);
+    display.WriteStringAligned(strbuffNote, Font_16x26, boundsToDrawIn,
+                               Alignment::topCentered, true);
+  }
 
   // This has to be an odd number so the middle block is "in tune"
   const uint8_t blockCount = 15;
@@ -132,38 +136,40 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
 
   bool blockActive[blockCount] = {false};
 
-  // The center block is always active
-  blockActive[inTuneBlockIndex] = true;
+  if (displayTuning) {
+    // The center block is always active
+    blockActive[inTuneBlockIndex] = true;
 
-  // Counter used to set the blocks (gets decremented as we set them active)
-  // We cap this to always show at least 1, and we will remove that 1 in the
-  // next step if our tuning threshold is met
-  uint8_t blockChangeCount =
-      std::max(numBlocksOutOfTuneToDisplay, static_cast<uint8_t>(1));
+    // Counter used to set the blocks (gets decremented as we set them active)
+    // We cap this to always show at least 1, and we will remove that 1 in the
+    // next step if our tuning threshold is met
+    uint8_t blockChangeCount =
+        std::max(numBlocksOutOfTuneToDisplay, static_cast<uint8_t>(1));
 
-  // Only show no blocks out of tune if we are within the close threshold
-  if (std::abs(m_cents) < closeThreshold) {
-    blockChangeCount = 0;
-  }
-
-  if (m_cents < 0) {
-    // Set the flat blocks state
-    for (int i = inTuneBlockIndex - 1; i >= 0; i--) {
-      if (blockChangeCount > 0) {
-        blockActive[i] = true;
-        blockChangeCount--;
-      } else {
-        break;
-      }
+    // Only show no blocks out of tune if we are within the close threshold
+    if (std::abs(m_cents) < closeThreshold) {
+      blockChangeCount = 0;
     }
-  } else {
-    // Set the sharp blocks state
-    for (int i = inTuneBlockIndex + 1; i < blockCount; i++) {
-      if (blockChangeCount > 0) {
-        blockActive[i] = true;
-        blockChangeCount--;
-      } else {
-        break;
+
+    if (m_cents < 0) {
+      // Set the flat blocks state
+      for (int i = inTuneBlockIndex - 1; i >= 0; i--) {
+        if (blockChangeCount > 0) {
+          blockActive[i] = true;
+          blockChangeCount--;
+        } else {
+          break;
+        }
+      }
+    } else {
+      // Set the sharp blocks state
+      for (int i = inTuneBlockIndex + 1; i < blockCount; i++) {
+        if (blockChangeCount > 0) {
+          blockActive[i] = true;
+          blockChangeCount--;
+        } else {
+          break;
+        }
       }
     }
   }
@@ -176,8 +182,10 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
     x += blockWidth;
   }
 
-  char strbuffFreq[64];
-  sprintf(strbuffFreq, FLT_FMT(2), FLT_VAR(2, m_currentFrequency));
-  display.WriteStringAligned(strbuffFreq, Font_7x10, boundsToDrawIn,
-                             Alignment::bottomCentered, true);
+  if (displayTuning) {
+    char strbuffFreq[64];
+    sprintf(strbuffFreq, FLT_FMT(2), FLT_VAR(2, m_currentFrequency));
+    display.WriteStringAligned(strbuffFreq, Font_7x10, boundsToDrawIn,
+                               Alignment::bottomCentered, true);
+  }
 }
