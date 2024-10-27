@@ -13,7 +13,12 @@ using namespace daisy;
 using namespace daisysp;
 using namespace cycfi::q;
 
-one_euro_filter smoothingFilter{48000, 0.5, 0.1, 0.1};
+// Inputs:
+// Estimated frequency: Overwritten by timestamps at runtime and not used
+// Cutoff Freq
+// Beta: 0.0f disables it entirely, but used for scaling cutoff frequency
+// Derivative cutoff freq: used when beta is > 0
+one_euro_filter<float, float> smoothingFilter{48000, 0.2f, 0.1f, 0.8f};
 
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
@@ -79,11 +84,9 @@ void TunerModule::ProcessMono(float in) {
     const float freq = m_pitchDetector->get_frequency();
 
     // Run a smoothing filter on the detected frequency
-    double currentTimeInSeconds =
-        static_cast<double>(System::GetNow()) / static_cast<double>(1000);
-    double filteredFreq = smoothingFilter(freq, currentTimeInSeconds);
-
-    m_currentFrequency = filteredFreq;
+    const float currentTimeInSeconds =
+        static_cast<float>(System::GetNow()) / 1000.f;
+    m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
   }
 
   m_note = Note(m_currentFrequency);
