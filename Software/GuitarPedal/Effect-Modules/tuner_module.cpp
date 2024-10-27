@@ -1,15 +1,22 @@
 #include "tuner_module.h"
 
 #include <q/fx/lowpass.hpp>
+#include <q/fx/moving_average.hpp>
 #include <q/fx/signal_conditioner.hpp>
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
+
+#include "../Util/1efilter.hpp"
 
 using namespace bkshepherd;
 
 using namespace daisy;
 using namespace daisysp;
 using namespace cycfi::q;
+
+// one_euro_filter<float, double> smoothingFilter{48000, 0.5, 0, 0.1};
+
+// cycfi::q::basic_moving_average<float> smoothingFilter{48};
 
 const char k_notes[12][3] = {"C",  "C#", "D",  "D#", "E",  "F",
                              "F#", "G",  "G#", "A",  "A#", "B"};
@@ -77,10 +84,16 @@ void TunerModule::ProcessMono(float in) {
 
   // If result is ready, get the detected frequency
   if (ready) {
-    m_currentFrequency = m_pitchDetector->get_frequency();
+    const float freq = m_pitchDetector->get_frequency();
 
     // Run a smoothing filter on the detected frequency
-    m_currentFrequency = m_smoothingFilter->operator()(m_currentFrequency);
+    m_currentFrequency = m_smoothingFilter->operator()(freq);
+
+    // double timestamp =
+    //     static_cast<double>(System::GetNow()) / static_cast<double>(1000);
+    // m_currentFrequency = smoothingFilter(freq, timestamp);
+
+    // m_currentFrequency = smoothingFilter(freq);
   }
 
   m_note = Note(m_currentFrequency);
@@ -94,7 +107,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
                          int numItemsTotal, Rectangle boundsToDrawIn,
                          bool isEditing) {
   char currentNote[12];
-  sprintf(currentNote, "%s%u", k_notes[m_note % 12], m_octave);
+  sprintf(currentNote, "%s", k_notes[m_note % 12]);
 
   char strbuffNote[64];
   sprintf(strbuffNote, "%s", currentNote);
@@ -108,7 +121,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex,
 
   // Thresholds for tuning accuracy mapping to blocks
   const float closeThreshold = 1.0f;
-  const float farLimit = 10.0f;
+  const float farLimit = 45.0f;
 
   // 0 is in tune, 1.0f is max out of tune we display, cents sign is used to
   // determine sharp or flat
