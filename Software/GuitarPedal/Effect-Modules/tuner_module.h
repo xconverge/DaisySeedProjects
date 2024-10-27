@@ -16,7 +16,6 @@ namespace cycfi {
 namespace q {
 class pitch_detector;
 class signal_conditioner;
-class dynamic_smoother;
 }  // namespace q
 }  // namespace cycfi
 
