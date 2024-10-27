@@ -3,18 +3,42 @@
 
 using namespace bkshepherd;
 
-static const char* s_waveBinNames[8] = {"Sine", "Triangle", "Saw", "Ramp", "Square", "Poly Tri", "Poly Saw", "Poly Sqr"};
+static const char *s_waveBinNames[8] = {"Sine",   "Triangle", "Saw",      "Ramp",
+                                        "Square", "Poly Tri", "Poly Saw", "Poly Sqr"};
 
 static const int s_paramCount = 4;
-static const ParameterMetaData s_metaData[s_paramCount] = {{name: "Wet", valueType: ParameterValueType::FloatMagnitude, defaultValue: 127, knobMapping: 0, midiCCMapping: 20},
-                                                           {name: "Osc Wave", valueType: ParameterValueType::Binned, valueBinCount: 8, valueBinNames: s_waveBinNames, defaultValue: 0, knobMapping: 2, midiCCMapping: 21},
-                                                           {name: "Osc Freq", valueType: ParameterValueType::FloatMagnitude, defaultValue: 12, knobMapping: 1, midiCCMapping: 1},
-                                                           {name: "Stereo", valueType: ParameterValueType::Bool, defaultValue: 0, knobMapping: -1, midiCCMapping: 23}};       // 0 is Mono (even if fed stereo) 1 is Stereo
+static const ParameterMetaData s_metaData[s_paramCount] = {
+    {
+        name : "Wet",
+        valueType : ParameterValueType::FloatMagnitude,
+        defaultValue : 127,
+        knobMapping : 0,
+        midiCCMapping : 20
+    },
+    {
+        name : "Osc Wave",
+        valueType : ParameterValueType::Binned,
+        valueBinCount : 8,
+        valueBinNames : s_waveBinNames,
+        defaultValue : 0,
+        knobMapping : 2,
+        midiCCMapping : 21
+    },
+    {
+        name : "Osc Freq",
+        valueType : ParameterValueType::FloatMagnitude,
+        defaultValue : 12,
+        knobMapping : 1,
+        midiCCMapping : 1
+    },
+    {name : "Stereo",
+     valueType : ParameterValueType::Bool,
+     defaultValue : 0,
+     knobMapping : -1,
+     midiCCMapping : 23}}; // 0 is Mono (even if fed stereo) 1 is Stereo
 
 // Default Constructor
-AutoPanModule::AutoPanModule() : BaseEffectModule(),
-                                                m_freqOscFreqMin(0.01f),
-                                                m_freqOscFreqMax(4.0f)
+AutoPanModule::AutoPanModule() : BaseEffectModule(), m_freqOscFreqMin(0.01f), m_freqOscFreqMax(4.0f)
 
 {
     // Set the name of the effect
@@ -44,13 +68,14 @@ void AutoPanModule::ProcessMono(float in)
 {
     BaseEffectModule::ProcessMono(in);
 
-    // Calculate Pan Oscillation 
+    // Calculate Pan Oscillation
     m_freqOsc.SetWaveform(GetParameterAsBinnedValue(1) - 1);
     m_freqOsc.SetAmp(0.5f);
     m_freqOsc.SetFreq(m_freqOscFreqMin + (GetParameterAsMagnitude(2) * m_freqOscFreqMax));
     float mod = 0.5f + m_freqOsc.Process();
 
-    if (GetParameterRaw(2) == 0) {
+    if (GetParameterRaw(2) == 0)
+    {
         mod = 0.5f;
         m_pan = mod;
     }
@@ -71,7 +96,7 @@ void AutoPanModule::ProcessMono(float in)
 }
 
 void AutoPanModule::ProcessStereo(float inL, float inR)
-{    
+{
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -112,7 +137,7 @@ void AutoPanModule::SetTempo(uint32_t bpm)
     {
         SetParameterRaw(2, 127);
     }
-    else 
+    else
     {
         // Get the parameter as close as we can to target tempo
         SetParameterRaw(2, ((freq - m_freqOscFreqMin) / (m_freqOscFreqMax - m_freqOscFreqMin)) * 128);
@@ -120,7 +145,7 @@ void AutoPanModule::SetTempo(uint32_t bpm)
 }
 
 float AutoPanModule::GetBrightnessForLED(int led_id)
-{    
+{
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
     if (led_id == 1)
@@ -135,10 +160,10 @@ void AutoPanModule::UpdateUI(float elapsedTime)
 {
     // Let the base class do it's thing.
     BaseEffectModule::UpdateUI(elapsedTime);
-
 }
 
-void AutoPanModule::DrawUI(OneBitGraphicsDisplay& display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn, bool isEditing)
+void AutoPanModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal,
+                           Rectangle boundsToDrawIn, bool isEditing)
 {
     // Let the base class do it's thing.
     BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);

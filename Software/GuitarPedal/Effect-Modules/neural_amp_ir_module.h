@@ -13,43 +13,45 @@
 
 using namespace daisysp;
 
-namespace bkshepherd {
+namespace bkshepherd
+{
 
-class NeuralAmpIRModule : public BaseEffectModule {
- public:
-  NeuralAmpIRModule();
-  ~NeuralAmpIRModule();
+class NeuralAmpIRModule : public BaseEffectModule
+{
+  public:
+    NeuralAmpIRModule();
+    ~NeuralAmpIRModule();
 
-  void Init(float sample_rate) override;
-  void ParameterChanged(int parameter_id) override;
-  void ProcessMono(float in) override;
-  void ProcessStereo(float inL, float inR) override;
-  float GetBrightnessForLED(int led_id) override;
+    void Init(float sample_rate) override;
+    void ParameterChanged(int parameter_id) override;
+    void ProcessMono(float in) override;
+    void ProcessStereo(float inL, float inR) override;
+    float GetBrightnessForLED(int led_id) override;
 
- private:
-  void SelectModel();
-  void SelectIR();
-  void CalculateTone();
+  private:
+    void SelectModel();
+    void SelectIR();
+    void CalculateTone();
 
-  int m_currentModelIndex = -1;
-  float m_nnLevelAdjust = 0;
+    int m_currentModelIndex = -1;
+    float m_nnLevelAdjust = 0;
 
-  int m_currentIRIndex = -1;
+    int m_currentIRIndex = -1;
 
-  bool m_irEnabled = true;
-  bool m_ampEnabled = true;
+    bool m_irEnabled = true;
+    bool m_ampEnabled = true;
 
-  float m_gainMin;
-  float m_gainMax;
+    float m_gainMin;
+    float m_gainMax;
 
-  float m_levelMin;
-  float m_levelMax;
+    float m_levelMin;
+    float m_levelMax;
 
-  float m_cutoffMin;
-  float m_cutoffMax;
+    float m_cutoffMin;
+    float m_cutoffMax;
 
-  Tone m_tone;  // Low Pass
+    Tone m_tone; // Low Pass
 };
-}  // namespace bkshepherd
+} // namespace bkshepherd
 #endif
 #endif

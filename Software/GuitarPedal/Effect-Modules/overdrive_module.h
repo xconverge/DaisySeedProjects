@@ -2,9 +2,9 @@
 #ifndef OVERDRIVE_MODULE_H
 #define OVERDRIVE_MODULE_H
 
-#include <stdint.h>
-#include "daisysp.h"
 #include "base_effect_module.h"
+#include "daisysp.h"
+#include <stdint.h>
 #ifdef __cplusplus
 
 /** @file overdrive_module.h */

@@ -2,9 +2,9 @@
 #ifndef GUITAR_PEDAL_UI_H
 #define GUITAR_PEDAL_UI_H
 
+#include "CustomMappedValues.h"
 #include "daisy_seed.h"
 #include "effect_module_menu_item.h"
-#include "CustomMappedValues.h"
 using namespace daisy;
 
 const int kNumMainMenuItems = 3;
@@ -62,7 +62,7 @@ class GuitarPedalUI
     FullScreenItemMenu m_activeEffectSettingsMenu;
     FullScreenItemMenu m_globalSettingsMenu;
     FullScreenItemMenu m_presetsMenu;
-    UiEventQueue       m_eventQueue;
+    UiEventQueue m_eventQueue;
 
     bool m_needToCloseActiveEffectSettingsMenu;
     float m_secondsTilReturnFromParamChange;
@@ -76,7 +76,7 @@ class GuitarPedalUI
     AbstractMenu::ItemConfig *m_activeEffectSettingsMenuItems;
     EffectModuleMenuItem m_effectModuleMenuItem;
 
-    const char** m_availableEffectNames;
+    const char **m_availableEffectNames;
     MappedStringListValue *m_availableEffectListMappedValues;
     MappedIntValue **m_activeEffectSettingIntValues;
     MappedIntValue m_activePresetSettingIntValue;

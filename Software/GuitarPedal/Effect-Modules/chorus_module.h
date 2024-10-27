@@ -2,9 +2,9 @@
 #ifndef CHORUS_MODULE_H
 #define CHORUS_MODULE_H
 
-#include <stdint.h>
-#include "daisysp.h"
 #include "base_effect_module.h"
+#include "daisysp.h"
+#include <stdint.h>
 #ifdef __cplusplus
 
 /** @file chorus_module.h */

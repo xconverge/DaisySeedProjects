@@ -3,15 +3,26 @@
 using namespace bkshepherd;
 
 static const int s_paramCount = 2;
-static const ParameterMetaData s_metaData[s_paramCount] = {{name: "Drive", valueType: ParameterValueType::FloatMagnitude, valueBinCount: 0, defaultValue: 57, knobMapping: 1, midiCCMapping: 1},
-                                                           {name: "Level", valueType: ParameterValueType::FloatMagnitude, valueBinCount: 0, defaultValue: 40, knobMapping: 0, midiCCMapping: 21}};
+static const ParameterMetaData s_metaData[s_paramCount] = {{
+                                                               name : "Drive",
+                                                               valueType : ParameterValueType::FloatMagnitude,
+                                                               valueBinCount : 0,
+                                                               defaultValue : 57,
+                                                               knobMapping : 1,
+                                                               midiCCMapping : 1
+                                                           },
+                                                           {
+                                                               name : "Level",
+                                                               valueType : ParameterValueType::FloatMagnitude,
+                                                               valueBinCount : 0,
+                                                               defaultValue : 40,
+                                                               knobMapping : 0,
+                                                               midiCCMapping : 21
+                                                           }};
 
 // Default Constructor
-OverdriveModule::OverdriveModule() : BaseEffectModule(),
-                                        m_driveMin(0.4f),
-                                        m_driveMax(0.8f),
-                                        m_levelMin(0.01f),
-                                        m_levelMax(0.20f)
+OverdriveModule::OverdriveModule()
+    : BaseEffectModule(), m_driveMin(0.4f), m_driveMax(0.8f), m_levelMin(0.01f), m_levelMax(0.20f)
 
 {
     // Set the name of the effect
@@ -52,7 +63,7 @@ void OverdriveModule::ProcessMono(float in)
 }
 
 void OverdriveModule::ProcessStereo(float inL, float inR)
-{    
+{
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -68,7 +79,7 @@ void OverdriveModule::ProcessStereo(float inL, float inR)
 }
 
 float OverdriveModule::GetBrightnessForLED(int led_id)
-{    
+{
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
     if (led_id == 1)

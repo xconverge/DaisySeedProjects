@@ -2,9 +2,9 @@
 #ifndef REVERB_MODULE_H
 #define REVERB_MODULE_H
 
-#include <stdint.h>
-#include "daisysp.h"
 #include "base_effect_module.h"
+#include "daisysp.h"
+#include <stdint.h>
 #ifdef __cplusplus
 
 /** @file reverb_module.h */

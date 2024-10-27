@@ -2,8 +2,8 @@
 #ifndef EFFECT_MODULE_MENU_ITEM_H
 #define EFFECT_MODULE_MENU_ITEM_H
 
-#include "daisy_seed.h"
 #include "../Effect-Modules/base_effect_module.h"
+#include "daisy_seed.h"
 
 using namespace daisy;
 
@@ -39,7 +39,7 @@ class EffectModuleMenuItem : public daisy::AbstractMenu::CustomItem
     void ModifyValue(int16_t increments, uint16_t stepsPerRevolution, bool isFunctionButtonPressed) override;
 
     /** Called when the value slider is used to modify the value. */
-    void ModifyValue(float valueSliderPosition0To1,  bool isFunctionButtonPressed) override;
+    void ModifyValue(float valueSliderPosition0To1, bool isFunctionButtonPressed) override;
 
     /** Called when the okay button is pressed (and CanBeEnteredForEditing() returns false). */
     void OnOkayButton() override;
@@ -56,15 +56,12 @@ class EffectModuleMenuItem : public daisy::AbstractMenu::CustomItem
      * @param boundsToDrawIn    The Rectangle to draw the item into
      * @param isEditing         True if the enter button was pressed and the value is being edited directly.
      */
-    void Draw(OneBitGraphicsDisplay& display,
-                          int                    currentIndex,
-                          int                    numItemsTotal,
-                          Rectangle              boundsToDrawIn,
-                          bool                   isEditing) override;
+    void Draw(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
+              bool isEditing) override;
 
   private:
-    UI* m_parentUI;
-    UiPage* m_effectSettingsPage;
+    UI *m_parentUI;
+    UiPage *m_effectSettingsPage;
     BaseEffectModule *m_effectModule;
     bool m_isSavingData;
 };

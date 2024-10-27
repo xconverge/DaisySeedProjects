@@ -13,42 +13,37 @@ extern int activeEffectID;
 extern BaseEffectModule *activeEffect;
 
 // These will be called from the UI system. @see InitUi()
-void FlushCanvas(const UiCanvasDescriptor& canvasDescriptor)
+void FlushCanvas(const UiCanvasDescriptor &canvasDescriptor)
 {
-    if(canvasDescriptor.id_ == 0)
+    if (canvasDescriptor.id_ == 0)
     {
-        OneBitGraphicsDisplay& display = *((OneBitGraphicsDisplay*)(canvasDescriptor.handle_));
+        OneBitGraphicsDisplay &display = *((OneBitGraphicsDisplay *)(canvasDescriptor.handle_));
         display.Update();
     }
 }
 
-void ClearCanvas(const daisy::UiCanvasDescriptor& canvasDescriptor)
+void ClearCanvas(const daisy::UiCanvasDescriptor &canvasDescriptor)
 {
-    if(canvasDescriptor.id_ == 0)
+    if (canvasDescriptor.id_ == 0)
     {
-        OneBitGraphicsDisplay& display = *((OneBitGraphicsDisplay*)(canvasDescriptor.handle_));
+        OneBitGraphicsDisplay &display = *((OneBitGraphicsDisplay *)(canvasDescriptor.handle_));
         display.Fill(false);
     }
 }
 
 // Default Constructor
-GuitarPedalUI::GuitarPedalUI() : m_needToCloseActiveEffectSettingsMenu(false),
-                                    m_paramIdToReturnTo(-1),
-                                    m_numActiveEffectSettingsItems(0),
-                                    m_activePresetSelected(0),
-                                    m_activePresetSettingIntValue(0,255,0,1,1),
-                                    m_midiChannelSettingValue(1,16,1,1,5),
-                                    m_displayingSaveSettingsNotification(false),
-                                    m_secondsSinceLastActiveEffectSettingsSave(0.0f)
+GuitarPedalUI::GuitarPedalUI()
+    : m_needToCloseActiveEffectSettingsMenu(false), m_paramIdToReturnTo(-1), m_numActiveEffectSettingsItems(0),
+      m_activePresetSelected(0), m_activePresetSettingIntValue(0, 255, 0, 1, 1),
+      m_midiChannelSettingValue(1, 16, 1, 1, 5), m_displayingSaveSettingsNotification(false),
+      m_secondsSinceLastActiveEffectSettingsSave(0.0f)
 
 {
-
 }
 
 // Destructor
 GuitarPedalUI::~GuitarPedalUI()
 {
-
 }
 
 void GuitarPedalUI::Init()
@@ -58,9 +53,9 @@ void GuitarPedalUI::Init()
     InitGlobalSettingsUIPages();
     m_ui.OpenPage(m_mainMenu);
 }
- 
+
 void GuitarPedalUI::UpdateActiveEffect(int effectID)
-{   
+{
     if (hardware.SupportsDisplay())
     {
         // Update the Menu item for the active effect (important for active effect changes not coming from the menu)
@@ -104,7 +99,8 @@ void GuitarPedalUI::UpdateActiveEffectParameterValue(int paramID, bool showChang
             else
             {
                 // Handle Case where Bin Values do have names
-                m_activeEffectSettingStringValues[paramID]->SetIndex(activeEffect->GetParameterAsBinnedValue(paramID) - 1);
+                m_activeEffectSettingStringValues[paramID]->SetIndex(activeEffect->GetParameterAsBinnedValue(paramID) -
+                                                                     1);
             }
         }
 
@@ -122,7 +118,8 @@ void GuitarPedalUI::UpdateActiveEffectParameterValue(int paramID, bool showChang
             }
             else
             {
-                // If we were already on the param menu and we didn't open it, make sure we store the param index so we can return to it
+                // If we were already on the param menu and we didn't open it, make sure we store the param index so we
+                // can return to it
                 if (m_paramIdToReturnTo == -1 && !m_needToCloseActiveEffectSettingsMenu)
                 {
                     m_paramIdToReturnTo = m_activeEffectSettingsMenu.GetSelectedItemIdx();
@@ -134,7 +131,7 @@ void GuitarPedalUI::UpdateActiveEffectParameterValue(int paramID, bool showChang
         }
     }
 }
-    
+
 void GuitarPedalUI::UpdateActiveEffectParameterValues()
 {
     if (hardware.SupportsDisplay())
@@ -165,22 +162,19 @@ int GuitarPedalUI::GetActiveEffectIDFromSettingsMenu()
 void GuitarPedalUI::InitUi()
 {
     UI::SpecialControlIds specialControlIds;
-    specialControlIds.okBttnId = 0; // Encoder button is our okay button
+    specialControlIds.okBttnId = 0;      // Encoder button is our okay button
     specialControlIds.menuEncoderId = 0; // Encoder is used as the main menu navigation encoder
 
     // This is the canvas for the OLED display.
     UiCanvasDescriptor oledDisplayDescriptor;
-    oledDisplayDescriptor.id_     = 0; // the unique ID
-    oledDisplayDescriptor.handle_ = &hardware.display;   // a pointer to the display
-    oledDisplayDescriptor.updateRateMs_      = 50; // 50ms == 20Hz
-    oledDisplayDescriptor.screenSaverTimeOut = 0;  // display always on
-    oledDisplayDescriptor.clearFunction_     = &ClearCanvas;
-    oledDisplayDescriptor.flushFunction_     = &FlushCanvas;
+    oledDisplayDescriptor.id_ = 0;                     // the unique ID
+    oledDisplayDescriptor.handle_ = &hardware.display; // a pointer to the display
+    oledDisplayDescriptor.updateRateMs_ = 50;          // 50ms == 20Hz
+    oledDisplayDescriptor.screenSaverTimeOut = 0;      // display always on
+    oledDisplayDescriptor.clearFunction_ = &ClearCanvas;
+    oledDisplayDescriptor.flushFunction_ = &FlushCanvas;
 
-    m_ui.Init(m_eventQueue,
-            specialControlIds,
-            {oledDisplayDescriptor},
-            0);
+    m_ui.Init(m_eventQueue, specialControlIds, {oledDisplayDescriptor}, 0);
 }
 
 void GuitarPedalUI::InitEffectUiPages()
@@ -199,7 +193,7 @@ void GuitarPedalUI::InitEffectUiPages()
     m_mainMenuItems[1].type = daisy::AbstractMenu::ItemType::openUiPageItem;
     m_mainMenuItems[1].text = "Settings";
     m_mainMenuItems[1].asOpenUiPageItem.pageToOpen = &m_globalSettingsMenu;
-    
+
     m_mainMenuItems[2].type = daisy::AbstractMenu::ItemType::openUiPageItem;
     m_mainMenuItems[2].text = "Preset";
     m_mainMenuItems[2].asOpenUiPageItem.pageToOpen = &m_presetsMenu;
@@ -212,7 +206,7 @@ void GuitarPedalUI::InitEffectUiPages()
     // Clean up any dynamically allocated memory
     if (m_activeEffectSettingIntValues != NULL)
     {
-        for(int i = 0; i < m_numActiveEffectSettingsItems; ++i)
+        for (int i = 0; i < m_numActiveEffectSettingsItems; ++i)
         {
             if (m_activeEffectSettingIntValues[i] != NULL)
             {
@@ -220,29 +214,28 @@ void GuitarPedalUI::InitEffectUiPages()
             }
         }
 
-        delete [] m_activeEffectSettingIntValues;
+        delete[] m_activeEffectSettingIntValues;
         m_activeEffectSettingIntValues = NULL;
     }
 
     // Clean up any dynamically allocated memory
     if (m_activeEffectSettingFloatValues != NULL)
     {
-        delete [] m_activeEffectSettingFloatValues;
+        delete[] m_activeEffectSettingFloatValues;
         m_activeEffectSettingFloatValues = NULL;
     }
-    
+
     if (m_activeEffectSettingStringValues != NULL)
     {
-        for(int i = 0; i < m_numActiveEffectSettingsItems; ++i)
+        for (int i = 0; i < m_numActiveEffectSettingsItems; ++i)
         {
             if (m_activeEffectSettingStringValues[i] != NULL)
             {
                 delete m_activeEffectSettingStringValues[i];
             }
         }
-            
 
-        delete [] m_activeEffectSettingStringValues;
+        delete[] m_activeEffectSettingStringValues;
         m_activeEffectSettingStringValues = NULL;
     }
 
@@ -250,22 +243,22 @@ void GuitarPedalUI::InitEffectUiPages()
 
     if (m_activeEffectSettingBoolValues != NULL)
     {
-        delete [] m_activeEffectSettingBoolValues;
+        delete[] m_activeEffectSettingBoolValues;
     }
 
     if (m_activeEffectSettingsMenuItems != NULL)
     {
-        delete [] m_activeEffectSettingsMenuItems;
+        delete[] m_activeEffectSettingsMenuItems;
     }
 
     m_numActiveEffectSettingsItems = activeEffect->GetParameterCount();
-    m_activeEffectSettingIntValues = new MappedIntValue*[m_numActiveEffectSettingsItems];
-    m_activeEffectSettingFloatValues = new MyMappedFloatValue*[m_numActiveEffectSettingsItems];
-    m_activeEffectSettingStringValues = new MappedStringListValue*[m_numActiveEffectSettingsItems];
+    m_activeEffectSettingIntValues = new MappedIntValue *[m_numActiveEffectSettingsItems];
+    m_activeEffectSettingFloatValues = new MyMappedFloatValue *[m_numActiveEffectSettingsItems];
+    m_activeEffectSettingStringValues = new MappedStringListValue *[m_numActiveEffectSettingsItems];
     m_activeEffectSettingBoolValues = new bool[m_numActiveEffectSettingsItems];
 
     // Initialize the param value stores to a known state.
-    for(int i = 0; i < m_numActiveEffectSettingsItems; ++i)
+    for (int i = 0; i < m_numActiveEffectSettingsItems; ++i)
     {
         m_activeEffectSettingIntValues[i] = NULL;
         m_activeEffectSettingStringValues[i] = NULL;
@@ -273,12 +266,12 @@ void GuitarPedalUI::InitEffectUiPages()
     }
 
     m_activeEffectSettingsMenuItems = new AbstractMenu::ItemConfig[m_numActiveEffectSettingsItems + 1];
-    
+
     for (int i = 0; i < m_numActiveEffectSettingsItems; i++)
     {
         m_activeEffectSettingsMenuItems[i].text = activeEffect->GetParameterName(i);
 
-        int parameterType = activeEffect->GetParameterType(i);        
+        int parameterType = activeEffect->GetParameterType(i);
 
         if (parameterType == -1 || parameterType == ParameterValueType::Raw)
         {
@@ -286,7 +279,8 @@ void GuitarPedalUI::InitEffectUiPages()
             int maxValue = activeEffect->GetParameterMax(i);
             // Unknown or Raw value Types
             m_activeEffectSettingsMenuItems[i].type = AbstractMenu::ItemType::valueItem;
-            m_activeEffectSettingIntValues[i] = new MappedIntValue(minValue, maxValue, activeEffect->GetParameterRaw(i), 1, 5);
+            m_activeEffectSettingIntValues[i] =
+                new MappedIntValue(minValue, maxValue, activeEffect->GetParameterRaw(i), 1, 5);
             m_activeEffectSettingsMenuItems[i].asMappedValueItem.valueToModify = m_activeEffectSettingIntValues[i];
         }
         else if (parameterType == ParameterValueType::FloatMagnitude)
@@ -296,7 +290,8 @@ void GuitarPedalUI::InitEffectUiPages()
             float fineStep = activeEffect->GetParameterFineStepSize(i);
             // Raw32 value or Float Magnitude Types
             m_activeEffectSettingsMenuItems[i].type = AbstractMenu::ItemType::valueItem;
-            m_activeEffectSettingFloatValues[i] = new MyMappedFloatValue(minValue, maxValue, activeEffect->GetParameterAsFloat(i));
+            m_activeEffectSettingFloatValues[i] =
+                new MyMappedFloatValue(minValue, maxValue, activeEffect->GetParameterAsFloat(i));
             m_activeEffectSettingFloatValues[i]->SetFineStepSize(fineStep);
             m_activeEffectSettingsMenuItems[i].asMappedValueItem.valueToModify = m_activeEffectSettingFloatValues[i];
         }
@@ -312,19 +307,21 @@ void GuitarPedalUI::InitEffectUiPages()
             // Binned Value Type
             m_activeEffectSettingsMenuItems[i].type = AbstractMenu::ItemType::valueItem;
             int binnedValue = activeEffect->GetParameterAsBinnedValue(i);
-            const char** binNames = activeEffect->GetParameterBinNames(i);
+            const char **binNames = activeEffect->GetParameterBinNames(i);
 
             if (binNames == NULL)
             {
-                m_activeEffectSettingIntValues[i] = new MappedIntValue(1, activeEffect->GetParameterBinCount(i), binnedValue, 1, 5);
+                m_activeEffectSettingIntValues[i] =
+                    new MappedIntValue(1, activeEffect->GetParameterBinCount(i), binnedValue, 1, 5);
                 m_activeEffectSettingsMenuItems[i].asMappedValueItem.valueToModify = m_activeEffectSettingIntValues[i];
             }
             else
             {
-                m_activeEffectSettingStringValues[i] = new MappedStringListValue(binNames, activeEffect->GetParameterBinCount(i), binnedValue-1);
-                m_activeEffectSettingsMenuItems[i].asMappedValueItem.valueToModify = m_activeEffectSettingStringValues[i];
+                m_activeEffectSettingStringValues[i] =
+                    new MappedStringListValue(binNames, activeEffect->GetParameterBinCount(i), binnedValue - 1);
+                m_activeEffectSettingsMenuItems[i].asMappedValueItem.valueToModify =
+                    m_activeEffectSettingStringValues[i];
             }
-            
         }
     }
 
@@ -349,10 +346,10 @@ void GuitarPedalUI::InitGlobalSettingsUIPages()
 
     if (m_availableEffectNames != NULL)
     {
-        delete [] m_availableEffectNames;
+        delete[] m_availableEffectNames;
     }
 
-    m_availableEffectNames = new const char*[availableEffectsCount];
+    m_availableEffectNames = new const char *[availableEffectsCount];
     int m_activeEffectIndex = -1;
 
     for (int i = 0; i < availableEffectsCount; i++)
@@ -364,8 +361,9 @@ void GuitarPedalUI::InitGlobalSettingsUIPages()
             m_activeEffectIndex = i;
         }
     }
-    
-    m_availableEffectListMappedValues = new MappedStringListValue(m_availableEffectNames, availableEffectsCount, m_activeEffectIndex);
+
+    m_availableEffectListMappedValues =
+        new MappedStringListValue(m_availableEffectNames, availableEffectsCount, m_activeEffectIndex);
 
     m_globalSettingsMenuItems[0].type = AbstractMenu::ItemType::valueItem;
     m_globalSettingsMenuItems[0].text = "Effect";
@@ -396,7 +394,6 @@ void GuitarPedalUI::InitGlobalSettingsUIPages()
     m_globalSettingsMenuItems[6].text = "Back";
 
     m_globalSettingsMenu.Init(m_globalSettingsMenuItems, kNumGlobalSettingsMenuItems);
-    
 
     m_presetsMenuItems[0].type = AbstractMenu::ItemType::valueItem;
     m_presetsMenuItems[0].text = "Preset #";
@@ -404,14 +401,14 @@ void GuitarPedalUI::InitGlobalSettingsUIPages()
 
     m_presetsMenuItems[1].type = AbstractMenu::ItemType::callbackFunctionItem;
     m_presetsMenuItems[1].text = "Erase All";
-    m_presetsMenuItems[1].asCallbackFunctionItem.callbackFunction = &FactoryReset;    
+    m_presetsMenuItems[1].asCallbackFunctionItem.callbackFunction = &FactoryReset;
     m_presetsMenuItems[1].asCallbackFunctionItem.context = this;
 
     m_presetsMenuItems[2].type = AbstractMenu::ItemType::closeMenuItem;
     m_presetsMenuItems[2].text = "Back";
 
     m_presetsMenu.Init(m_presetsMenuItems, kNumPresetSettingsItems);
-    
+
     m_activePresetSettingIntValue.Set(activeEffect->GetCurrentPreset());
 }
 
@@ -422,19 +419,19 @@ void GuitarPedalUI::GenerateUIEvents()
         return;
     }
 
-    if(hardware.encoders[0].RisingEdge())
+    if (hardware.encoders[0].RisingEdge())
     {
         m_eventQueue.AddButtonPressed(0, 1);
     }
 
-    if(hardware.encoders[0].FallingEdge())
+    if (hardware.encoders[0].FallingEdge())
     {
         m_eventQueue.AddButtonReleased(0);
     }
 
     const auto increments = hardware.encoders[0].Increment();
 
-    if(increments != 0)
+    if (increments != 0)
     {
         m_eventQueue.AddEncoderTurned(0, increments, 12);
     }
@@ -468,7 +465,7 @@ void GuitarPedalUI::UpdateUI(float elapsedTime)
                 m_paramIdToReturnTo = -1;
             }
         }
-    }        
+    }
 
     // Handle Displaying the Saving notication
     if (m_displayingSaveSettingsNotification)
@@ -484,20 +481,22 @@ void GuitarPedalUI::UpdateUI(float elapsedTime)
             m_effectModuleMenuItem.SetIsSavingData(false);
         }
     }
-    
+
     m_activePresetSelected = m_activePresetSettingIntValue.Get();
-    // Set the target preset from the menu, the ui will be the "brains" and figure out what actual preset number makes sense here, since Base Effects does not know its effect id.
-    if(m_activePresetSelected != activeEffect->GetCurrentPreset())
+    // Set the target preset from the menu, the ui will be the "brains" and figure out what actual preset number makes
+    // sense here, since Base Effects does not know its effect id.
+    if (m_activePresetSelected != activeEffect->GetCurrentPreset())
     {
         uint32_t temp = activeEffect->GetPresetCount();
-        if(m_activePresetSelected < temp)
+        if (m_activePresetSelected < temp)
         {
             activeEffect->SetCurrentPreset(m_activePresetSelected);
             LoadPresetFromPersistentStorage(activeEffectID, m_activePresetSelected);
         }
         else
         {
-            // Basically set 1 index higher than the actual presets, expecting the user to save the new preset in the usual way
+            // Basically set 1 index higher than the actual presets, expecting the user to save the new preset in the
+            // usual way
             m_activePresetSelected = temp;
             activeEffect->SetCurrentPreset(m_activePresetSelected);
             m_activePresetSettingIntValue.Set(m_activePresetSelected);
@@ -506,7 +505,7 @@ void GuitarPedalUI::UpdateUI(float elapsedTime)
         for (int i = 0; i < m_numActiveEffectSettingsItems; i++)
         {
             int parameterType = activeEffect->GetParameterType(i);
-    
+
             if (parameterType == -1 || parameterType == 0)
             {
                 // Unknown or Raw value Types
@@ -544,7 +543,7 @@ void GuitarPedalUI::UpdateUI(float elapsedTime)
         for (int i = 0; i < m_numActiveEffectSettingsItems; i++)
         {
             int parameterType = activeEffect->GetParameterType(i);
-    
+
             if (parameterType == -1 || parameterType == 0)
             {
                 // Unknown, Raw value or Float Magnitude Types
@@ -576,7 +575,6 @@ void GuitarPedalUI::UpdateUI(float elapsedTime)
             }
         }
     }
-    
 
     // Update the Midi Channel if the value was changed in the Menu
     settings.globalMidiChannel = m_midiChannelSettingValue.Get();
