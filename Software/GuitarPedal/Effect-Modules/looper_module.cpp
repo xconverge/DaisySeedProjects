@@ -126,14 +126,12 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex,
                           bool isEditing) {
   BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn,
                            isEditing);
-  uint16_t center = boundsToDrawIn.GetHeight() / 2;
-
   float percentageDone = 100.0 * (m_looperL.GetPos() / m_looperL.GetRecSize());
   char strbuff[64];
   if (m_looperL.Recording()) {
-    sprintf(strbuff, "R %.2f  ", percentageDone);
+    sprintf(strbuff, "R " FLT_FMT(1), FLT_VAR(1, percentageDone));
   } else {
-    sprintf(strbuff, "  %.2f  ", percentageDone);
+    sprintf(strbuff, FLT_FMT(1), FLT_VAR(1, percentageDone));
   }
 
   display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn,
