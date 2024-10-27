@@ -14,6 +14,9 @@ CPP_SOURCES = guitar_pedal.cpp \
 # Compiler options
 OPT = -Os
 
+# DEBUG=1
+# OPT = -Og
+
 # Boot options
 APP_TYPE = BOOT_SRAM
 
