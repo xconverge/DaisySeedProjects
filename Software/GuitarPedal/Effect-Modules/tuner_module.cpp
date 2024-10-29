@@ -100,6 +100,8 @@ void TunerModule::ProcessMono(float in)
     m_note = Note(m_currentFrequency);
     m_octave = Octave(m_currentFrequency);
     m_cents = Cents(m_currentFrequency, m_note);
+
+    m_audioLeft = m_audioRight = in;
 }
 
 void TunerModule::ProcessStereo(float inL, float inR)
