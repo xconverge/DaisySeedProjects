@@ -67,7 +67,7 @@ bool *knobValueCacheChanged = NULL;
 float *knobValueCache = NULL;
 int *knobValueSamplesTilIdle = NULL;
 
-// Switch Monitorying Variables
+// Switch Monitoring Variables
 float switchEnabledIdleTimeInSeconds = 2.0f;
 int switchEnabledIdleTimeInSamples;
 bool *switchEnabledCache = NULL;

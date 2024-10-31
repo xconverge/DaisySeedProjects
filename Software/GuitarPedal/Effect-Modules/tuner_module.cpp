@@ -122,6 +122,10 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
         char strbuffNote[64];
         sprintf(strbuffNote, "%s", currentNote);
         display.WriteStringAligned(strbuffNote, Font_16x26, boundsToDrawIn, Alignment::topCentered, true);
+
+        char strbuffOctave[12];
+        sprintf(strbuffOctave, "%d", m_octave);
+        display.WriteStringAligned(strbuffOctave, Font_11x18, boundsToDrawIn, Alignment::topRight, true);
     }
 
     // This has to be an odd number so the middle block is "in tune"
