@@ -10,7 +10,9 @@ using namespace bkshepherd;
 float DSY_SDRAM_BSS bufferL[kBuffSize];
 float DSY_SDRAM_BSS bufferR[kBuffSize];
 
-static const int s_paramCount = 2;
+static const char *s_loopModeNames[4] = {"Normal", "One-time", "Replace", "Fripp"};
+
+static const int s_paramCount = 3;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
         name : "Input Level",
@@ -26,6 +28,15 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         valueBinCount : 0,
         defaultValue : 64,
         knobMapping : 1,
+        midiCCMapping : -1
+    },
+    {
+        name : "Mode",
+        valueType : ParameterValueType::Binned,
+        valueBinCount : 4,
+        valueBinNames : s_loopModeNames,
+        defaultValue : 0,
+        knobMapping : 2,
         midiCCMapping : -1
     },
 };
@@ -57,6 +68,23 @@ void LooperModule::Init(float sample_rate)
     // Init the loopers
     m_looperL.Init(bufferL, kBuffSize);
     m_looperR.Init(bufferR, kBuffSize);
+
+    SetLooperMode();
+}
+
+void LooperModule::SetLooperMode()
+{
+    const int modeIndex = GetParameterAsBinnedValue(2) - 1;
+    m_looperL.SetMode(static_cast<daisysp_modified::Looper::Mode>(modeIndex));
+    m_looperR.SetMode(static_cast<daisysp_modified::Looper::Mode>(modeIndex));
+}
+
+void LooperModule::ParameterChanged(int parameter_id)
+{
+    if (parameter_id == 2)
+    {
+        SetLooperMode();
+    }
 }
 
 void LooperModule::AlternateFootswitchPressed()

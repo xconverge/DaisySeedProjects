@@ -23,6 +23,7 @@ class LooperModule : public BaseEffectModule
     ~LooperModule();
 
     void Init(float sample_rate) override;
+    void ParameterChanged(int parameter_id) override;
     void ProcessMono(float in) override;
     void ProcessStereo(float inL, float inR) override;
     float GetBrightnessForLED(int led_id) override;
@@ -36,6 +37,8 @@ class LooperModule : public BaseEffectModule
                 bool isEditing) override;
 
   private:
+    void SetLooperMode();
+
     // Loopers and the buffers they'll use
     daisysp_modified::Looper m_looperL;
     daisysp_modified::Looper m_looperR;
