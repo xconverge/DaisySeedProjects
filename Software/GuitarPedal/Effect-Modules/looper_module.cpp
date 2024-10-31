@@ -153,6 +153,25 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int 
 {
     BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);
     float percentageDone = 100.0 * (m_looperL.GetPos() / m_looperL.GetRecSize());
+
+    int width = boundsToDrawIn.GetWidth();
+    int numBlocks = 20;
+    int blockWidth = width / numBlocks;
+    int top = 30;
+    int x = 0;
+    for (int block = 0; block < numBlocks; block++)
+    {
+        Rectangle r(x, top, blockWidth, blockWidth);
+
+        bool active = false;
+        if ((static_cast<float>(block) / static_cast<float>(numBlocks) * 100.0f) <= percentageDone)
+        {
+            active = true;
+        }
+        display.DrawRect(r, true, active);
+        x += blockWidth;
+    }
+
     char strbuff[64];
     if (m_looperL.Recording())
     {
@@ -163,5 +182,5 @@ void LooperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int 
         sprintf(strbuff, FLT_FMT(1), FLT_VAR(1, percentageDone));
     }
 
-    display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn, Alignment::centered, true);
+    display.WriteStringAligned(strbuff, Font_11x18, boundsToDrawIn, Alignment::bottomCentered, true);
 }

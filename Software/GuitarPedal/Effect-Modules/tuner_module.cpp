@@ -125,7 +125,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
     }
 
     // This has to be an odd number so the middle block is "in tune"
-    const uint8_t blockCount = 15;
+    const uint8_t blockCount = 21;
     const uint8_t inTuneBlockIndex = (blockCount - 1) / 2;
     const uint8_t numBlocksOutOfTune = (blockCount - 1) / 2;
 
