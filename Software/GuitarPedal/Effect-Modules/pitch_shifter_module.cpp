@@ -5,7 +5,7 @@
 
 using namespace bkshepherd;
 
-static const char *s_semitoneBinNames[8] = {"0", "1", "2", "3", "4", "5", "6", "7"};
+static const char *s_semitoneBinNames[8] = {"1", "2", "3", "4", "5", "6", "7", "OCT"};
 static const char *s_directionBinNames[2] = {"DOWN", "UP"};
 static const char *s_modeBinNames[2] = {"LATCH", "MOMENT"};
 
@@ -21,7 +21,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         valueType : ParameterValueType::Binned,
         valueBinCount : 8,
         valueBinNames : s_semitoneBinNames,
-        defaultValue : (127 / 8) * 2,
+        defaultValue : 0,
         knobMapping : 0,
         midiCCMapping : -1
     },
@@ -83,6 +83,23 @@ PitchShifterModule::~PitchShifterModule()
 {
 }
 
+void PitchShifterModule::ProcessSemitoneTargetChange()
+{
+    int semitoneNum = GetParameterAsBinnedValue(0);
+
+    // If this is the last semitone option, convert it to be a full octave
+    if (semitoneNum == 8)
+    {
+        semitoneNum = 12;
+    }
+
+    m_semitoneTarget = semitoneNum;
+    if (m_directionDown)
+    {
+        m_semitoneTarget *= -1.0f;
+    }
+}
+
 void PitchShifterModule::Init(float sample_rate)
 {
     BaseEffectModule::Init(sample_rate);
@@ -95,14 +112,9 @@ void PitchShifterModule::Init(float sample_rate)
     m_latching = GetParameterAsBinnedValue(3) == 1;
 
     m_directionDown = GetParameterAsBinnedValue(2) == 1;
-    if (m_directionDown)
-    {
-        m_semitoneTarget = (GetParameterAsBinnedValue(0) - 1) * -1.0f;
-    }
-    else
-    {
-        m_semitoneTarget = (GetParameterAsBinnedValue(0) - 1);
-    }
+
+    ProcessSemitoneTargetChange();
+
     pitchShifter.SetTransposition(m_semitoneTarget);
 
     m_delayValue = GetParameterAsMagnitude(4);
@@ -112,16 +124,10 @@ void PitchShifterModule::ParameterChanged(int parameter_id)
 {
     if (parameter_id == 0 || parameter_id == 2)
     {
-        // Change semitone when semitone knob is turned or direction is changed
         m_directionDown = GetParameterAsBinnedValue(2) == 1;
-        if (m_directionDown)
-        {
-            m_semitoneTarget = (GetParameterAsBinnedValue(0) - 1) * -1.0f;
-        }
-        else
-        {
-            m_semitoneTarget = (GetParameterAsBinnedValue(0) - 1);
-        }
+
+        // Change semitone when semitone knob is turned or direction is changed
+        ProcessSemitoneTargetChange();
     }
     else if (parameter_id == 1)
     {
