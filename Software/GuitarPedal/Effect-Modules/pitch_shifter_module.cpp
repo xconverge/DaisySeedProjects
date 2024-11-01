@@ -125,8 +125,9 @@ void PitchShifterModule::Init(float sample_rate)
 
     pitchShifter.SetTransposition(m_semitoneTarget);
 
-    m_delayValueShift = GetParameterAsMagnitude(4);
-    m_delayValueReturn = GetParameterAsMagnitude(5);
+    m_samplesToDelayShift = static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(4));
+    m_samplesToDelayReturn =
+        static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(5));
 }
 
 void PitchShifterModule::ParameterChanged(int parameter_id)
@@ -148,11 +149,13 @@ void PitchShifterModule::ParameterChanged(int parameter_id)
     }
     else if (parameter_id == 4)
     {
-        m_delayValueShift = GetParameterAsMagnitude(4);
+        m_samplesToDelayShift =
+            static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(4));
     }
     else if (parameter_id == 5)
     {
-        m_delayValueReturn = GetParameterAsMagnitude(5);
+        m_samplesToDelayReturn =
+            static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(5));
     }
 
     // Parameters changed, reset the transposition target just in case (mostly
@@ -172,9 +175,9 @@ void PitchShifterModule::AlternateFootswitchPressed()
         // We were in the middle of a return so reset for shifting
         if (m_transitioningReturn)
         {
-            // TODO SK: calculate sample counter to maintain the exact transpose/percentage we are currently at to avoid
+            // Calculate sample counter to maintain the exact transpose/percentage we are currently at to avoid
             // it "starting from the beginning of the transition"
-            m_sampleCounter = 0;
+            m_sampleCounter = (1.0f - m_percentageTransitionComplete) * m_samplesToDelayShift;
             m_transitioningReturn = false;
         }
     }
@@ -192,9 +195,9 @@ void PitchShifterModule::AlternateFootswitchReleased()
         // We were in the middle of a shift so reset for return
         if (m_transitioningShift)
         {
-            // TODO SK: calculate sample counter to maintain the exact transpose/percentage we are currently at to avoid
+            // Calculate sample counter to maintain the exact transpose/percentage we are currently at to avoid
             // it "starting from the beginning of the transition"
-            m_sampleCounter = 0;
+            m_sampleCounter = (1.0f - m_percentageTransitionComplete) * m_samplesToDelayReturn;
             m_transitioningShift = false;
         }
     }
@@ -252,17 +255,17 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
 
     // When in momentary mode, there is a ramp up(pressed [shift])/ramp down(released [return])
     // transition of the semitone based on the "delay" parameter
-    int samplesToDelay = 0;
+    uint32_t samplesToDelay = 0;
     if (m_transitioningShift)
     {
-        samplesToDelay = static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * m_delayValueShift);
+        samplesToDelay = m_samplesToDelayShift;
     }
     else if (m_transitioningReturn)
     {
-        samplesToDelay = static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * m_delayValueReturn);
+        samplesToDelay = m_samplesToDelayReturn;
     }
 
-    if (samplesToDelay > 0)
+    if (samplesToDelay != 0)
     {
         // Clamp just to make sure we don't overshoot the goal just in case
         m_percentageTransitionComplete =
