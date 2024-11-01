@@ -238,11 +238,11 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
     // ---- Process ramp up/ramp down transition ----
 
     // Clamp just to make sure we don't overshoot the semitone just in case
-    const float percentageComplete =
+    m_percentageTransitionComplete =
         std::clamp(static_cast<float>(m_sampleCounter) / static_cast<float>(samplesToDelay), 0.0f, 1.0f);
 
     // Perform the pitch shift
-    pitchShifter.SetTransposition(m_semitoneTarget * percentageComplete);
+    pitchShifter.SetTransposition(m_semitoneTarget * m_percentageTransitionComplete);
     float shifted = pitchShifter.Process(in);
     float pitchOut = pitchCrossfade.Process(in, shifted);
 
@@ -260,4 +260,46 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
     }
 
     return pitchOut;
+}
+
+void PitchShifterModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal,
+                                Rectangle boundsToDrawIn, bool isEditing)
+{
+    BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);
+
+    // Only add a UI for when we are in momentary mode
+    if (m_latching)
+    {
+        return;
+    }
+
+    int width = boundsToDrawIn.GetWidth();
+    int numBlocks = 20;
+    int blockWidth = width / numBlocks;
+    int top = 30;
+    int x = 0;
+    const bool transitioning = m_sampleCounter > 0 && m_delayValue > 0;
+    for (int block = 0; block < numBlocks; block++)
+    {
+        Rectangle r(x, top, blockWidth, blockWidth);
+
+        bool active = false;
+        if (transitioning)
+        {
+            if ((static_cast<float>(block) / static_cast<float>(numBlocks)) <= m_percentageTransitionComplete)
+            {
+                active = true;
+            }
+        }
+        else
+        {
+            if (m_alternateFootswitchPressed)
+            {
+                active = true;
+            }
+        }
+
+        display.DrawRect(r, true, active);
+        x += blockWidth;
+    }
 }

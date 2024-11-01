@@ -29,6 +29,8 @@ class PitchShifterModule : public BaseEffectModule
     }
     void AlternateFootswitchPressed() override;
     void AlternateFootswitchReleased() override;
+    void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
+                bool isEditing) override;
 
   private:
     float ProcessMomentaryMode(float in);
@@ -42,6 +44,8 @@ class PitchShifterModule : public BaseEffectModule
 
     float m_delayValue = 0;
     uint32_t m_sampleCounter = 0;
+
+    float m_percentageTransitionComplete = 0.0;
 };
 } // namespace bkshepherd
 #endif
