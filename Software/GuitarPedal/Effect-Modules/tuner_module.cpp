@@ -1,11 +1,19 @@
 #include "tuner_module.h"
 
+#include "../Util/1efilter.hpp"
 #include "../Util/yin.h"
 
 using namespace bkshepherd;
 
 using namespace daisy;
 using namespace daisysp;
+
+// Inputs:
+// Estimated frequency: Overwritten by timestamps at runtime and not used
+// Cutoff Freq
+// Beta: 0.0f disables it entirely, but used for scaling cutoff frequency
+// Derivative cutoff freq: used when beta is > 0
+one_euro_filter<float, float> smoothingFilter{48000, 0.5f, 0.05f, 1.0f};
 
 const char k_notes[12][3] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
@@ -102,8 +110,8 @@ void TunerModule::ProcessMono(float in)
         if (yin.probability > 0.90)
         {
             // Run a smoothing filter on the detected frequency
-            -const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
-            -m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
+            const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
+            m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
         }
     }
 
