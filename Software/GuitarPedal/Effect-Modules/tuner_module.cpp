@@ -4,6 +4,8 @@
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
 
+#include "../Util/yin.h"
+
 #include "../Util/1efilter.hpp"
 
 using namespace bkshepherd;
@@ -25,6 +27,13 @@ static const int s_paramCount = 1;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {name : "Mute", valueType : ParameterValueType::Bool, defaultValue : 127, knobMapping : 0, midiCCMapping : -1},
 };
+
+static uint32_t bufferIndex = 0;
+const float yinThreshold = 0.15;
+constexpr int yinBufferLength = 2048;
+static float buffer[yinBufferLength];
+static float internalYinBuffer[yinBufferLength / 2];
+static Yin yin{yinBufferLength, yinBufferLength / 2, &internalYinBuffer[0], 0.f, yinThreshold};
 
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule()
@@ -62,6 +71,11 @@ void TunerModule::Init(float sample_rate)
     m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency, highest_frequency, sample_rate};
 
     m_muteOutput = GetParameterAsBool(0);
+
+    for (int i = 0; i < yinBufferLength; i++)
+    {
+        buffer[i] = 0.0f;
+    }
 }
 
 float Pitch(uint8_t note)
@@ -94,16 +108,24 @@ void TunerModule::ParameterChanged(int parameter_id)
 
 void TunerModule::ProcessMono(float in)
 {
-    // Pre-process the signal for pitch detection
-    float preProcessedSignal = m_preProcessor->operator()(in);
+    buffer[bufferIndex++] = in;
 
-    // Send the processed sample through the pitch detector
-    const bool ready = m_pitchDetector->operator()(preProcessedSignal);
-
-    // If result is ready, get the detected frequency
-    if (ready)
+    if (bufferIndex > yinBufferLength)
     {
-        const float freq = m_pitchDetector->get_frequency();
+        bufferIndex = 0;
+
+        // Reinitialize yin struct
+        yin.probability = 0.0f;
+        yin.threshold = yinThreshold;
+        yin.bufferSize = yinBufferLength;
+        yin.halfBufferSize = yinBufferLength / 2;
+        for (int i = 0; i < yin.halfBufferSize; i++)
+        {
+            yin.yinBuffer[i] = 0.0f;
+        }
+
+        // Get pitch
+        const float freq = Yin_getPitch(&yin, &buffer[0], 48000);
 
         // Run a smoothing filter on the detected frequency
         const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
