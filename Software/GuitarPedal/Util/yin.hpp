@@ -1,10 +1,17 @@
+// Nearly exact copy from:
+// https://github.com/ashokfernandez/Yin-Pitch-Tracking
+// Changed sample rate to be added to getPitch
+// Changed init() to not use malloc so allocation happens in frequency detector class
+
+#pragma once
+#ifndef YIN_H
+#define YIN_H
 
 #include <cmath>
 #include <cstdint>
 
 namespace yin
 {
-// https://github.com/ashokfernandez/Yin-Pitch-Tracking
 
 /**
  * @struct  Yin
@@ -248,3 +255,5 @@ float getProbability(Yin *yin)
 }
 
 } // namespace yin
+
+#endif
