@@ -520,9 +520,9 @@ int main(void)
     availableEffects[7] = new MetroModule();
     availableEffects[8] = new NeuralAmpIRModule();
     availableEffects[9] = new LooperModule();
-    availableEffects[10] = new PitchShifterModule();
-    availableEffects[11] = new TunerModule();
-    availableEffects[12] = new CompressorModule();
+    availableEffects[10] = new TunerModule();
+    availableEffects[11] = new CompressorModule();
+    availableEffects[12] = new PitchShifterModule();
 
     for (int i = 0; i < availableEffectsCount; i++)
     {

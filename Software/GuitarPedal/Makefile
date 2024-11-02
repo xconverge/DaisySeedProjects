@@ -31,5 +31,5 @@ SYSTEM_FILES_DIR = $(LIBDAISY_DIR)/core
 include $(SYSTEM_FILES_DIR)/Makefile
 
 # RT Neural lib
-C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen -I./q/q/q_lib/include -I./q/infra/include
+C_INCLUDES += -I./RTNeural -I./RTNeural/modules/Eigen -I./q/q/q_lib/include -I./q/infra/include -I./signalsmith-stretch
 CPPFLAGS += -DRTNEURAL_DEFAULT_ALIGNMENT=8 -DRTNEURAL_NO_DEBUG=1

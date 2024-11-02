@@ -1,4 +1,5 @@
 #include "pitch_shifter_module.h"
+#include "signalsmith-stretch.h"
 
 #include "../Util/pitch_shifter.h"
 #include "daisysp.h"
@@ -69,9 +70,8 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
 };
 
-// Fixed loud noise at startup (First time after power cycle) by NOT
-// putting this in DSY_SDRAM_BSS
-static daisysp_modified::PitchShifter pitchShifter;
+static signalsmith::stretch::SignalsmithStretch<float> stretch;
+
 static daisysp::CrossFade pitchCrossfade;
 
 // Default Constructor
@@ -112,7 +112,8 @@ void PitchShifterModule::Init(float sample_rate)
 {
     BaseEffectModule::Init(sample_rate);
 
-    pitchShifter.Init(sample_rate);
+    // TODO SK: Uncommenting this prevents init from working...
+    // stretch.presetCheaper(1, sample_rate);
 
     pitchCrossfade.Init(CROSSFADE_CPOW);
     pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
@@ -123,7 +124,7 @@ void PitchShifterModule::Init(float sample_rate)
 
     ProcessSemitoneTargetChange();
 
-    pitchShifter.SetTransposition(m_semitoneTarget);
+    // stretch.setTransposeSemitones(m_semitoneTarget);
 
     m_samplesToDelayShift = static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(4));
     m_samplesToDelayReturn =
@@ -160,7 +161,7 @@ void PitchShifterModule::ParameterChanged(int parameter_id)
 
     // Parameters changed, reset the transposition target just in case (mostly
     // impacts momentary/latch and delay)
-    pitchShifter.SetTransposition(m_semitoneTarget);
+    stretch.setTransposeSemitones(m_semitoneTarget);
 }
 
 void PitchShifterModule::AlternateFootswitchPressed()
@@ -203,6 +204,20 @@ void PitchShifterModule::AlternateFootswitchReleased()
     }
 }
 
+float PitchShifterModule::ProcessPitchShift(float in)
+{
+    float inputBuffers[1][1];
+    float outputBuffers[1][1];
+    int inputSamples = 1;
+    int outputSamples = 1;
+
+    inputBuffers[0][0] = in;
+
+    stretch.process(inputBuffers, inputSamples, outputBuffers, outputSamples);
+
+    return outputBuffers[0][0];
+}
+
 void PitchShifterModule::ProcessMono(float in)
 {
     float out = in;
@@ -211,7 +226,7 @@ void PitchShifterModule::ProcessMono(float in)
     {
         // When in latching mode, just process the target semitone at all times
         // immediately
-        float shifted = pitchShifter.Process(in);
+        float shifted = ProcessPitchShift(in);
         out = pitchCrossfade.Process(in, shifted);
     }
     else
@@ -245,8 +260,8 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
         }
 
         // Process the pitch shift for completely active to the target
-        pitchShifter.SetTransposition(semitone);
-        float shifted = pitchShifter.Process(in);
+        stretch.setTransposeSemitones(semitone);
+        float shifted = ProcessPitchShift(in);
         float out = pitchCrossfade.Process(in, shifted);
         return out;
     }
@@ -279,14 +294,14 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
     // Perform the pitch shift
     if (m_transitioningShift)
     {
-        pitchShifter.SetTransposition(m_semitoneTarget * m_percentageTransitionComplete);
+        stretch.setTransposeSemitones(m_semitoneTarget * m_percentageTransitionComplete);
     }
     else if (m_transitioningReturn)
     {
-        pitchShifter.SetTransposition(m_semitoneTarget * (1.0f - m_percentageTransitionComplete));
+        stretch.setTransposeSemitones(m_semitoneTarget * (1.0f - m_percentageTransitionComplete));
     }
 
-    float shifted = pitchShifter.Process(in);
+    float shifted = ProcessPitchShift(in);
     float pitchOut = pitchCrossfade.Process(in, shifted);
 
     // Increment the counter for the next pass
@@ -350,4 +365,8 @@ void PitchShifterModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex
         display.DrawRect(r, true, active);
         x += blockWidth;
     }
+
+    // TODO SK: put these on the bottom of the UI
+    int inputLatency = stretch.inputLatency();
+    int outputLatency = stretch.outputLatency();
 }

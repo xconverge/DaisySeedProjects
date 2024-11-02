@@ -35,6 +35,7 @@ class PitchShifterModule : public BaseEffectModule
   private:
     float ProcessMomentaryMode(float in);
     void ProcessSemitoneTargetChange();
+    float ProcessPitchShift(float in);
 
     bool m_latching = true;
     bool m_directionDown = true;
