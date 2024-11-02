@@ -27,6 +27,7 @@ void FrequencyDetectorYin::Init(float sampleRate)
 {
     m_sampleRate = static_cast<uint32_t>(sampleRate);
 
+    // Initialize buffer just in case
     for (int i = 0; i < bufferLength; i++)
     {
         buffer[i] = 0.0f;
