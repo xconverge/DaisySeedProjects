@@ -12,15 +12,6 @@
 
 using namespace daisysp;
 
-namespace cycfi
-{
-namespace q
-{
-class pitch_detector;
-class signal_conditioner;
-} // namespace q
-} // namespace cycfi
-
 namespace bkshepherd
 {
 
@@ -45,9 +36,6 @@ class TunerModule : public BaseEffectModule
     float m_cents = 0;
 
     bool m_muteOutput;
-
-    cycfi::q::pitch_detector *m_pitchDetector = nullptr;
-    cycfi::q::signal_conditioner *m_preProcessor = nullptr;
 };
 } // namespace bkshepherd
 #endif

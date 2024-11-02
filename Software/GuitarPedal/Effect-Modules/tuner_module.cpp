@@ -1,25 +1,11 @@
 #include "tuner_module.h"
 
-#include <q/fx/signal_conditioner.hpp>
-#include <q/pitch/pitch_detector.hpp>
-#include <q/support/pitch_names.hpp>
-
 #include "../Util/yin.h"
-
-#include "../Util/1efilter.hpp"
 
 using namespace bkshepherd;
 
 using namespace daisy;
 using namespace daisysp;
-using namespace cycfi::q;
-
-// Inputs:
-// Estimated frequency: Overwritten by timestamps at runtime and not used
-// Cutoff Freq
-// Beta: 0.0f disables it entirely, but used for scaling cutoff frequency
-// Derivative cutoff freq: used when beta is > 0
-one_euro_filter<float, float> smoothingFilter{48000, 0.5f, 0.05f, 1.0f};
 
 const char k_notes[12][3] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
 
@@ -50,25 +36,11 @@ TunerModule::TunerModule() : BaseEffectModule()
 // Destructor
 TunerModule::~TunerModule()
 {
-    delete m_pitchDetector;
-    m_pitchDetector = nullptr;
-
-    delete m_preProcessor;
-    m_preProcessor = nullptr;
 }
 
 void TunerModule::Init(float sample_rate)
 {
     BaseEffectModule::Init(sample_rate);
-
-    // The frequency detection bounds;
-    frequency lowest_frequency = pitch_names::C[2];
-    frequency highest_frequency = pitch_names::C[5];
-
-    m_pitchDetector = new pitch_detector{lowest_frequency, highest_frequency, sample_rate, lin_to_db(0)};
-
-    signal_conditioner::config preprocessor_config;
-    m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency, highest_frequency, sample_rate};
 
     m_muteOutput = GetParameterAsBool(0);
 
@@ -127,9 +99,12 @@ void TunerModule::ProcessMono(float in)
         // Get pitch
         const float freq = Yin_getPitch(&yin, &buffer[0], 48000);
 
-        // Run a smoothing filter on the detected frequency
-        const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
-        m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
+        if (yin.probability > 0.90)
+        {
+            // Run a smoothing filter on the detected frequency
+            -const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
+            -m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
+        }
     }
 
     m_note = Note(m_currentFrequency);
