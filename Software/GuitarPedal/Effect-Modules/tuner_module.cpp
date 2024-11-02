@@ -1,7 +1,7 @@
 #include "tuner_module.h"
 
 #include "../Util/1efilter.hpp"
-#include "../Util/yin.h"
+#include "../Util/frequency_detector_yin.h"
 
 using namespace bkshepherd;
 
@@ -22,13 +22,6 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     {name : "Mute", valueType : ParameterValueType::Bool, defaultValue : 127, knobMapping : 0, midiCCMapping : -1},
 };
 
-static uint32_t bufferIndex = 0;
-const float yinThreshold = 0.15;
-constexpr int yinBufferLength = 2048;
-static float buffer[yinBufferLength];
-static float internalYinBuffer[yinBufferLength / 2];
-static Yin yin{yinBufferLength, yinBufferLength / 2, &internalYinBuffer[0], 0.f, yinThreshold};
-
 // Default Constructor
 TunerModule::TunerModule() : BaseEffectModule()
 {
@@ -39,11 +32,15 @@ TunerModule::TunerModule() : BaseEffectModule()
     this->InitParams(s_paramCount);
 
     m_name = "Tuner";
+
+    m_frequencyDetector = new FrequencyDetectorYin();
 }
 
 // Destructor
 TunerModule::~TunerModule()
 {
+    delete m_frequencyDetector;
+    m_frequencyDetector = nullptr;
 }
 
 void TunerModule::Init(float sample_rate)
@@ -52,10 +49,8 @@ void TunerModule::Init(float sample_rate)
 
     m_muteOutput = GetParameterAsBool(0);
 
-    for (int i = 0; i < yinBufferLength; i++)
-    {
-        buffer[i] = 0.0f;
-    }
+    m_frequencyDetector->Init(sample_rate);
+    smoothingFilter.setSampleRate(sample_rate);
 }
 
 float Pitch(uint8_t note)
@@ -88,32 +83,12 @@ void TunerModule::ParameterChanged(int parameter_id)
 
 void TunerModule::ProcessMono(float in)
 {
-    buffer[bufferIndex++] = in;
+    m_frequencyDetector->Process(in);
+    const float freq = m_frequencyDetector->GetFrequency();
 
-    if (bufferIndex > yinBufferLength)
-    {
-        bufferIndex = 0;
-
-        // Reinitialize yin struct
-        yin.probability = 0.0f;
-        yin.threshold = yinThreshold;
-        yin.bufferSize = yinBufferLength;
-        yin.halfBufferSize = yinBufferLength / 2;
-        for (int i = 0; i < yin.halfBufferSize; i++)
-        {
-            yin.yinBuffer[i] = 0.0f;
-        }
-
-        // Get pitch
-        const float freq = Yin_getPitch(&yin, &buffer[0], 48000);
-
-        if (yin.probability > 0.90)
-        {
-            // Run a smoothing filter on the detected frequency
-            const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
-            m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
-        }
-    }
+    // Run a smoothing filter on the detected frequency
+    const float currentTimeInSeconds = static_cast<float>(System::GetNow()) / 1000.f;
+    m_currentFrequency = smoothingFilter(freq, currentTimeInSeconds);
 
     m_note = Note(m_currentFrequency);
     m_octave = Octave(m_currentFrequency);
