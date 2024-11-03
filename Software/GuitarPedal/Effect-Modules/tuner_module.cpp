@@ -26,7 +26,7 @@ TunerModule::TunerModule() : BaseEffectModule()
 
     m_name = "Tuner";
 
-    m_frequencyDetector = new FrequencyDetectorYin();
+    m_frequencyDetector = new FrequencyDetectorQ();
 }
 
 // Destructor
