@@ -5,7 +5,7 @@ class FrequencyDetectorInterface
   public:
     FrequencyDetectorInterface() {};
     virtual ~FrequencyDetectorInterface() {};
-    virtual void Init(float sampleRate) {};
-    virtual float Process(float in) {};
+    virtual void Init(float sampleRate) = 0;
+    virtual float Process(float in) = 0;
 };
 #endif
