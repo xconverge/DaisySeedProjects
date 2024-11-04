@@ -518,11 +518,11 @@ int main(void)
     availableEffects[5] = new ReverbModule();
     availableEffects[6] = new MultiDelayModule();
     availableEffects[7] = new MetroModule();
-    availableEffects[8] = new NeuralAmpIRModule();
-    availableEffects[9] = new LooperModule();
-    availableEffects[10] = new PitchShifterModule();
-    availableEffects[11] = new TunerModule();
-    availableEffects[12] = new CompressorModule();
+    availableEffects[8] = new TunerModule();
+    availableEffects[9] = new PitchShifterModule();
+    availableEffects[10] = new CompressorModule();
+    availableEffects[11] = new LooperModule();
+    availableEffects[12] = new NeuralAmpIRModule();
 
     for (int i = 0; i < availableEffectsCount; i++)
     {

@@ -66,11 +66,6 @@ template <typename T = double, typename timestamp_t = double> struct one_euro_fi
     {
     }
 
-    void setSampleRate(double sampleRate)
-    {
-        freq = sampleRate;
-    }
-
     T operator()(T x, timestamp_t t = -1)
     {
         T dx = 0;

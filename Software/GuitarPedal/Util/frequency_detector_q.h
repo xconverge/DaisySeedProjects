@@ -1,9 +1,10 @@
 #pragma once
 #ifndef FREQUENCY_DETECTOR_Q_H
 #define FREQUENCY_DETECTOR_Q_H
+#include <cstdint>
+
 #include "1efilter.hpp"
 #include "frequency_detector_interface.h"
-#include <cstdint>
 
 namespace cycfi
 {

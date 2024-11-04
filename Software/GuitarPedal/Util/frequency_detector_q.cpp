@@ -1,8 +1,9 @@
 #include "frequency_detector_q.h"
-#include "daisy.h"
 #include <q/fx/signal_conditioner.hpp>
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
+
+#include "daisy.h"
 
 using namespace cycfi::q;
 
@@ -29,8 +30,6 @@ void FrequencyDetectorQ::Init(float sampleRate)
 
     cycfi::q::signal_conditioner::config preprocessor_config;
     m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency, highest_frequency, sampleRate};
-
-    m_smoothingFilter.setSampleRate(sampleRate);
 }
 
 float FrequencyDetectorQ::Process(float in)

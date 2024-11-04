@@ -1,3 +1,8 @@
+// This is a copy of the looper from DaisySP with this PR applied:
+// https://github.com/electro-smith/DaisySP/pull/205
+// It simply adds getters for loop length and loop position.
+// This file can be deleted if that PR is merged and the submodule is updated
+
 /*
 Copyright (c) 2020 Electrosmith, Corp
 

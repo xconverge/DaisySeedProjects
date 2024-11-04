@@ -2,10 +2,11 @@
 #ifndef TUNER_MODULE_H
 #define TUNER_MODULE_H
 
+#include <stdint.h>
+
 #include "../Util/frequency_detector_interface.h"
 #include "base_effect_module.h"
 #include "daisysp.h"
-#include <stdint.h>
 #ifdef __cplusplus
 
 /** @file tuner_module.h */

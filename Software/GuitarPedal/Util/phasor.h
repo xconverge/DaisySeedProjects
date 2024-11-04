@@ -1,3 +1,7 @@
+// This is a copy of the phasor from DaisySP with this PR applied:
+// https://github.com/electro-smith/DaisySP/pull/166
+// This file can be deleted if that PR is merged and the submodule is updated
+
 #pragma once
 #ifndef PHASOR_H
 #define PHASOR_H

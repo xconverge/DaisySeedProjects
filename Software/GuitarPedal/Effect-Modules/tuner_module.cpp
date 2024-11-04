@@ -1,7 +1,6 @@
 #include "tuner_module.h"
 
 #include "../Util/frequency_detector_q.h"
-#include "../Util/frequency_detector_yin.h"
 
 using namespace bkshepherd;
 
@@ -190,8 +189,17 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
     int x = 0;
     for (int block = 0; block < blockCount; block++)
     {
-        Rectangle r(x, top, blockWidth, blockWidth);
-        display.DrawRect(r, true, blockActive[block]);
+        if (block == inTuneBlockIndex)
+        {
+            const int height = 20;
+            Rectangle r(x, top - 5, blockWidth, height);
+            display.DrawRect(r, true, blockActive[block]);
+        }
+        else
+        {
+            Rectangle r(x, top, blockWidth, blockWidth);
+            display.DrawRect(r, true, blockActive[block]);
+        }
         x += blockWidth;
     }
 

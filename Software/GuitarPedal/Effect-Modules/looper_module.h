@@ -6,12 +6,9 @@
 
 #include "../Util/looper.h"
 #include "base_effect_module.h"
-#include "daisysp.h"
 #ifdef __cplusplus
 
 /** @file looper_module.h */
-
-using namespace daisysp;
 
 namespace bkshepherd
 {
@@ -39,9 +36,7 @@ class LooperModule : public BaseEffectModule
   private:
     void SetLooperMode();
 
-    // Loopers and the buffers they'll use
-    daisysp_modified::Looper m_looperL;
-    daisysp_modified::Looper m_looperR;
+    daisysp_modified::Looper m_looper;
 
     float m_inputLevelMin;
     float m_inputLevelMax;
