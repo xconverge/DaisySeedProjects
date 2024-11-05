@@ -33,6 +33,7 @@ PersistentStorage<Settings> storage(hardware.seed.qspi);
 int availableEffectsCount = 0;
 BaseEffectModule **availableEffects = NULL;
 int activeEffectID = 0;
+int prevActiveEffectID = 0;
 BaseEffectModule *activeEffect = NULL;
 
 // UI Related Variables
@@ -51,6 +52,9 @@ bool bypassOn = false;
 float bypassToggleTransitionTimeInSeconds = 0.01f;
 int bypassToggleTransitionTimeInSamples;
 int samplesTilBypassToggle;
+
+// Used to debounce quick switching to/from the tuner
+bool quickSwitchAvailable = true;
 
 uint32_t lastTimeStampUS;
 float secondsSinceStartup = 0.0f;
@@ -384,6 +388,9 @@ void SetActiveEffect(int effectID)
 {
     if (effectID >= 0 && effectID < availableEffectsCount)
     {
+        // Store the last used effect
+        prevActiveEffectID = activeEffectID;
+
         // Update the ID cache
         activeEffectID = effectID;
 
@@ -525,11 +532,16 @@ int main(void)
     availableEffects[5] = new ReverbModule();
     availableEffects[6] = new MultiDelayModule();
     availableEffects[7] = new MetroModule();
-    availableEffects[8] = new TunerModule();
-    availableEffects[9] = new PitchShifterModule();
-    availableEffects[10] = new CompressorModule();
-    availableEffects[11] = new LooperModule();
-    availableEffects[12] = new NeuralAmpIRModule();
+    availableEffects[8] = new PitchShifterModule();
+    availableEffects[9] = new CompressorModule();
+    availableEffects[10] = new LooperModule();
+    availableEffects[11] = new NeuralAmpIRModule();
+    /*
+    Most modules should go here and availableEffectsCount should be updated accordingly
+    */
+    // Tuner should be last so that it is easy to keep a static index for it, we can then use the "last index" to quick
+    // switch between the last used effect and the tuner when we want to
+    availableEffects[availableEffectsCount - 1] = new TunerModule();
 
     for (int i = 0; i < availableEffectsCount; i++)
     {
@@ -666,6 +678,33 @@ int main(void)
                 desiredIndex = availableEffectsCount - 1;
             }
             SetActiveEffect(desiredIndex);
+        }
+
+        // If bypass is held for 2 seconds and alternate footswitch is not pressed (not trying to save) then quick
+        // switch to/from the tuner
+        if (quickSwitchAvailable &&
+            hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Bypass)]
+                    .TimeHeldMs() > 2000 &&
+            !hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate)]
+                 .Pressed())
+        {
+            if (activeEffectID == availableEffectsCount - 1)
+            {
+                SetActiveEffect(prevActiveEffectID);
+            }
+            else
+            {
+                SetActiveEffect(availableEffectsCount - 1);
+            }
+            quickSwitchAvailable = false;
+        }
+
+        // Disable quick switching until the footswitch is released to prevent infinite switching
+        if (!quickSwitchAvailable &&
+            !hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Bypass)]
+                 .Pressed())
+        {
+            quickSwitchAvailable = true;
         }
 
         if (hardware.SupportsDisplay())
