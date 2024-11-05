@@ -173,19 +173,22 @@ static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer
             effectOn ^= switchPressed;
         }
 
-        if (switchPressed && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
+        if (effectOn && switchPressed &&
+            i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
         {
             activeEffect->AlternateFootswitchPressed();
         }
 
         bool switchReleased = hardware.switches[i].FallingEdge();
-        if (switchReleased && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
+        if (effectOn && switchReleased &&
+            i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
         {
             activeEffect->AlternateFootswitchReleased();
         }
 
         bool switchHeld = hardware.switches[i].TimeHeldMs() >= 1000.f;
-        if (switchHeld && i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
+        if (effectOn && switchHeld &&
+            i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
         {
             activeEffect->AlternateFootswitchHeldFor1Second();
         }
