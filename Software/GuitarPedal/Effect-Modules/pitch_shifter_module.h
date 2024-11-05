@@ -33,6 +33,7 @@ class PitchShifterModule : public BaseEffectModule
                 bool isEditing) override;
 
   private:
+    void SetTranspose(float semitone);
     float ProcessMomentaryMode(float in);
     void ProcessSemitoneTargetChange();
 

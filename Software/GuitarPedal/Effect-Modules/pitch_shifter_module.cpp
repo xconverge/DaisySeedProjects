@@ -16,6 +16,8 @@ static const char *s_modeBinNames[2] = {"LATCH", "MOMENT"};
 // transition when in momentary mode. Has no effect on latching mode
 const uint32_t k_maxSamplesMaxTime = 48000 * 2;
 
+const uint32_t k_defaultSamplesDelayPitchShifter = 2048;
+
 static const int s_paramCount = 6;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
@@ -108,11 +110,41 @@ void PitchShifterModule::ProcessSemitoneTargetChange()
     }
 }
 
+void PitchShifterModule::SetTranspose(float semitone)
+{
+    // If this is latching, then we also adjust the delay to get the best sound from the adjustments at the cost of
+    // increased latency
+    if (m_latching)
+    {
+        // Larger delay size is higher fidelity/quality for a farther transpose, at the cost of additional latency
+        // (like...a lot of latency)
+
+        // 2048 works pretty well for 1 semitone and is just ~5ms, not too bad at all
+
+        // 6000 samples was the best I could find for a usable full octave tone,
+        // but is a whopping 125 ms, nearly unusable? kind of cool when blended
+        // with the dry signal though
+
+        // Value between 0 and 1 where 0 is 1 semitone and 1 is 12 semitones
+        const float interpolateValue = (std::abs(semitone) - 1.0f) / 11.0f;
+
+        // Linearly just choose a value between the min and max based on how many semitones we are dropping
+        const uint32_t delaySize = std::lerp(k_defaultSamplesDelayPitchShifter,
+                                             daisysp_modified::k_maxSamplesDelayPitchShifter, interpolateValue);
+
+        // Set delay size clamping to the min/max that are possible
+        pitchShifter.SetDelSize(
+            std::clamp(delaySize, k_defaultSamplesDelayPitchShifter, daisysp_modified::k_maxSamplesDelayPitchShifter));
+    }
+    pitchShifter.SetTransposition(semitone);
+}
+
 void PitchShifterModule::Init(float sample_rate)
 {
     BaseEffectModule::Init(sample_rate);
 
     pitchShifter.Init(sample_rate);
+    pitchShifter.SetDelSize(k_defaultSamplesDelayPitchShifter);
 
     pitchCrossfade.Init(CROSSFADE_CPOW);
     pitchCrossfade.SetPos(GetParameterAsMagnitude(1));
@@ -123,7 +155,7 @@ void PitchShifterModule::Init(float sample_rate)
 
     ProcessSemitoneTargetChange();
 
-    pitchShifter.SetTransposition(m_semitoneTarget);
+    SetTranspose(m_semitoneTarget);
 
     m_samplesToDelayShift = static_cast<uint32_t>(static_cast<float>(k_maxSamplesMaxTime) * GetParameterAsMagnitude(4));
     m_samplesToDelayReturn =
@@ -146,6 +178,10 @@ void PitchShifterModule::ParameterChanged(int parameter_id)
     else if (parameter_id == 3)
     {
         m_latching = GetParameterAsBinnedValue(3) == 1;
+        if (!m_latching)
+        {
+            pitchShifter.SetDelSize(k_defaultSamplesDelayPitchShifter);
+        }
     }
     else if (parameter_id == 4)
     {
@@ -160,7 +196,7 @@ void PitchShifterModule::ParameterChanged(int parameter_id)
 
     // Parameters changed, reset the transposition target just in case (mostly
     // impacts momentary/latch and delay)
-    pitchShifter.SetTransposition(m_semitoneTarget);
+    SetTranspose(m_semitoneTarget);
 }
 
 void PitchShifterModule::AlternateFootswitchPressed()
@@ -247,7 +283,7 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
         }
 
         // Process the pitch shift for completely active to the target
-        pitchShifter.SetTransposition(semitone);
+        SetTranspose(semitone);
         float shifted = pitchShifter.Process(in);
         float out = pitchCrossfade.Process(in, shifted);
         return out;
@@ -282,11 +318,11 @@ float PitchShifterModule::ProcessMomentaryMode(float in)
     // Perform the pitch shift
     if (m_transitioningShift)
     {
-        pitchShifter.SetTransposition(m_semitoneTarget * m_percentageTransitionComplete);
+        SetTranspose(m_semitoneTarget * m_percentageTransitionComplete);
     }
     else if (m_transitioningReturn)
     {
-        pitchShifter.SetTransposition(m_semitoneTarget * (1.0f - m_percentageTransitionComplete));
+        SetTranspose(m_semitoneTarget * (1.0f - m_percentageTransitionComplete));
     }
 
     float shifted = pitchShifter.Process(in);
