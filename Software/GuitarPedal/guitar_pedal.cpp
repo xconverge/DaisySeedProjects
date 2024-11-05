@@ -223,7 +223,7 @@ static void AudioCallback(AudioHandle::InputBuffer in, AudioHandle::OutputBuffer
                 // Register as Tap Tempo if Switch ID matched preferred mapping for
                 // TapTempo
 
-                if (!activeEffect->AlternateFootswitchForTempo() &&
+                if (activeEffect->AlternateFootswitchForTempo() &&
                     i == hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate))
                 {
                     needToChangeTempo = true;
