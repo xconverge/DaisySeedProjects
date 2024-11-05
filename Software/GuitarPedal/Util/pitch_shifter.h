@@ -22,7 +22,7 @@ using namespace daisysp;
 
 namespace daisysp_modified
 {
-constexpr uint32_t k_maxSamplesDelayPitchShifter = 10000;
+constexpr uint32_t k_maxSamplesDelayPitchShifter = 6000;
 
 static inline uint32_t hash_xs32(uint32_t x)
 {
