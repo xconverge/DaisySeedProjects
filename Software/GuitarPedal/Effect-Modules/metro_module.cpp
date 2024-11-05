@@ -175,7 +175,7 @@ void MetroModule::ProcessStereo(float inL, float inR)
 
 void MetroModule::SetTempo(uint32_t bpm)
 {
-    SetParameterRaw(1, bpm_tempo_to_raw(bpm));
+    SetParameterRaw(0, bpm_tempo_to_raw(bpm));
 }
 
 float MetroModule::GetBrightnessForLED(int led_id)
@@ -202,8 +202,8 @@ uint8_t MetroModule::bpm_tempo_to_raw(uint16_t bpm)
     else if (bpm < m_tempoBpmMin)
         bpm = m_tempoBpmMin;
 
-    float normalized = (bpm - m_tempoBpmMin) / (m_tempoBpmMax - m_tempoBpmMin);
-    uint8_t raw = normalized * 127;
+    float normalized = static_cast<float>(bpm - m_tempoBpmMin) / static_cast<float>(m_tempoBpmMax - m_tempoBpmMin);
+    uint8_t raw = std::round(normalized * 127.0f);
     return raw;
 }
 
