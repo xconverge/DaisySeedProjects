@@ -71,9 +71,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
     },
 };
 
-// Fixed loud noise at startup (First time after power cycle) by NOT
-// putting this in DSY_SDRAM_BSS
-static daisysp_modified::PitchShifter pitchShifter;
+static daisysp_modified::PitchShifter DSY_SDRAM_BSS pitchShifter;
 static daisysp::CrossFade pitchCrossfade;
 
 // Default Constructor
