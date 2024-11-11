@@ -1,4 +1,5 @@
 #include "frequency_detector_q.h"
+
 #include <q/fx/signal_conditioner.hpp>
 #include <q/pitch/pitch_detector.hpp>
 #include <q/support/pitch_names.hpp>
