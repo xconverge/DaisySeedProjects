@@ -13,11 +13,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class NeuralAmpIRModule : public BaseEffectModule
-{
+class NeuralAmpIRModule : public BaseEffectModule {
   public:
     NeuralAmpIRModule();
     ~NeuralAmpIRModule();

@@ -4,20 +4,17 @@
 #include "daisy.h"
 #include "daisysp.h"
 
-namespace daisy
-{
+namespace daisy {
 
 /** @brief An override of `MappedValue` that maps a float value using various mapping functions, but gives the end user
  * the flexibilty to change the step size.
  *  @author jelliesen, modified by achijos
  *  @addtogroup utility
  */
-class MyMappedFloatValue : public MappedValue
-{
+class MyMappedFloatValue : public MappedValue {
   public:
     /** The availablke mapping functions */
-    enum class Mapping
-    {
+    enum class Mapping {
         /** The value is mapped linearly between min and max. */
         lin,
         /** The value is mapped logarithmically. Note that the valid
@@ -39,38 +36,26 @@ class MyMappedFloatValue : public MappedValue
      * @param forceSign     Controls whether `AppendToString()` always prints the sign,
      *                      even for positive numbers
      */
-    MyMappedFloatValue(float min, float max, float defaultValue, Mapping mapping = Mapping::lin,
-                       const char *unitStr = "", uint8_t numDecimals = 1, bool forceSign = false,
-                       float coarseStepSize0to1_ = 0.05f, float fineStepSize0to1_ = 0.01f);
+    MyMappedFloatValue(float min, float max, float defaultValue, Mapping mapping = Mapping::lin, const char *unitStr = "",
+                       uint8_t numDecimals = 1, bool forceSign = false, float coarseStepSize0to1_ = 0.05f,
+                       float fineStepSize0to1_ = 0.01f);
 
-    ~MyMappedFloatValue() override
-    {
-    }
+    ~MyMappedFloatValue() override {}
 
     /** Returns the current value. */
-    float Get() const
-    {
-        return value_;
-    }
+    float Get() const { return value_; }
 
     /** Returns a const pointer to the current value. */
-    const float *GetPtr() const
-    {
-        return &value_;
-    }
+    const float *GetPtr() const { return &value_; }
 
     /** Sets the value, clamping it to the valid range. */
     void Set(float newValue);
 
     /** Returns the current value. */
-    operator float() const
-    {
-        return value_;
-    }
+    operator float() const { return value_; }
 
     /** Sets the value, clamping it to the valid range. */
-    MyMappedFloatValue &operator=(float val)
-    {
+    MyMappedFloatValue &operator=(float val) {
         Set(val);
         return *this;
     }
@@ -92,15 +77,9 @@ class MyMappedFloatValue : public MappedValue
      */
     void Step(int16_t numStepsUp, bool useCoarseStepSize) override;
 
-    void SetCoarseStepSize(float f)
-    {
-        coarseStepSize0to1_ = f;
-    }
+    void SetCoarseStepSize(float f) { coarseStepSize0to1_ = f; }
 
-    void SetFineStepSize(float f)
-    {
-        fineStepSize0to1_ = f;
-    }
+    void SetFineStepSize(float f) { fineStepSize0to1_ = f; }
 
   private:
     float value_;

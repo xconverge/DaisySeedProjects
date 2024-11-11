@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class OverdriveModule : public BaseEffectModule
-{
+class OverdriveModule : public BaseEffectModule {
   public:
     OverdriveModule();
     ~OverdriveModule();

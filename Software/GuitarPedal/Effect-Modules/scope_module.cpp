@@ -6,8 +6,7 @@ using namespace bkshepherd;
 static const ParameterMetaData s_metaData[0] = {};
 
 // Default Constructor
-ScopeModule::ScopeModule() : BaseEffectModule()
-{
+ScopeModule::ScopeModule() : BaseEffectModule() {
     // Set the name of the effect
     m_name = "Scope";
 
@@ -19,24 +18,20 @@ ScopeModule::ScopeModule() : BaseEffectModule()
 }
 
 // Destructor
-ScopeModule::~ScopeModule()
-{
+ScopeModule::~ScopeModule() {
     // No Code Needed
 }
 
-void ScopeModule::Init(float sample_rate)
-{
+void ScopeModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     m_bufferIndex = 0;
-    for (uint16_t i = 0; i < ScreenWidth; i++)
-    {
+    for (uint16_t i = 0; i < ScreenWidth; i++) {
         m_scopeBuffer[i] = 0;
     }
 }
 
-void ScopeModule::ProcessMono(float in)
-{
+void ScopeModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     m_scopeBuffer[m_bufferIndex] = in;
@@ -46,8 +41,7 @@ void ScopeModule::ProcessMono(float in)
     m_audioRight = m_audioLeft = in;
 }
 
-void ScopeModule::ProcessStereo(float inL, float inR)
-{
+void ScopeModule::ProcessStereo(float inL, float inR) {
     BaseEffectModule::ProcessStereo(inL, inR);
 
     m_scopeBuffer[m_bufferIndex] = (inL + inR) / 2.0f;
@@ -59,13 +53,11 @@ void ScopeModule::ProcessStereo(float inL, float inR)
 }
 
 void ScopeModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
-                         bool isEditing)
-{
+                         bool isEditing) {
     BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);
     uint16_t center = boundsToDrawIn.GetHeight() / 2;
 
-    for (uint16_t i = 0; i < ScreenWidth; i++)
-    {
+    for (uint16_t i = 0; i < ScreenWidth; i++) {
         display.DrawPixel(i, m_scopeBuffer[i] * center + center, true);
     }
 }

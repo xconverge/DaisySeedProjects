@@ -6,45 +6,36 @@
 #include <stdint.h>
 #ifdef __cplusplus
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
 #define PATTERN_STEPS_MAX 16
 #define PATTERNS_MAX 14
 
-enum NoteDuration
-{
+enum NoteDuration {
     D4, // quarter
     D8, // eigth
     D16 // sixteenth
 };
 
-struct Note
-{
+struct Note {
     bool active;
     NoteDuration duration;
 };
 
-struct Pattern
-{
+struct Pattern {
     uint8_t length;
     Note notes[PATTERN_STEPS_MAX];
 };
 
-class Chopper
-{
+class Chopper {
   private:
     static Pattern Patterns[PATTERNS_MAX];
 
     void IncPatternStep(uint8_t length);
 
   public:
-    Chopper()
-    {
-    }
-    ~Chopper()
-    {
-    }
+    Chopper() {}
+    ~Chopper() {}
 
     /** Initializes the Chopper
 
@@ -59,54 +50,37 @@ class Chopper
 
     /** Changes the frequency of the Chopper, and recalculates phase increment.
      */
-    inline void SetFreq(const float f)
-    {
+    inline void SetFreq(const float f) {
         freq_ = f;
         phase_inc_ = CalcPhaseInc(f);
     }
 
     /** Sets the amplitude of the waveform.
      */
-    inline void SetAmp(const float a)
-    {
-        amp_ = a;
-    }
+    inline void SetAmp(const float a) { amp_ = a; }
 
     /** Sets the pulse width (range 0 - 1)
      */
-    inline void SetPw(const float pw)
-    {
+    inline void SetPw(const float pw) {
         pw_ = daisysp::fclamp(pw, 0.0f, 1.0f);
         pw_rad_ = pw_ * TWOPI_F;
     }
 
     /** Returns true if cycle is at end of rise. Set during call to Process.
      */
-    inline bool IsEOR()
-    {
-        return eor_;
-    }
+    inline bool IsEOR() { return eor_; }
 
     /** Returns true if cycle is at end of cycle. Set during call to Process.
      */
-    inline bool IsEOC()
-    {
-        return eoc_;
-    }
+    inline bool IsEOC() { return eoc_; }
 
     /** Returns true if cycle rising.
      */
-    inline bool IsRising()
-    {
-        return phase_ < PI_F;
-    }
+    inline bool IsRising() { return phase_ < PI_F; }
 
     /** Returns true if cycle falling.
      */
-    inline bool IsFalling()
-    {
-        return phase_ >= PI_F;
-    }
+    inline bool IsFalling() { return phase_ >= PI_F; }
 
     /** Processes the waveform to be generated, returning one sample. This should be called once per sample period.
      */
@@ -114,10 +88,7 @@ class Chopper
 
     /** Adds a value 0.0-1.0 (mapped to 0.0-TWO_PI) to the current phase. Useful for PM and "FM" synthesis.
      */
-    void PhaseAdd(float _phase)
-    {
-        phase_ += (_phase * TWOPI_F);
-    }
+    void PhaseAdd(float _phase) { phase_ += (_phase * TWOPI_F); }
 
     /** Resets the phase to the input argument. If no argumeNt is present, it will reset phase to 0.0;
      */
@@ -127,28 +98,13 @@ class Chopper
     void SetPattern(int id);
     void NextPattern(bool reset = true);
     void PrevPattern(bool reset = true);
-    inline int16_t GetCurrentPattern()
-    {
-        return current_pattern_;
-    }
-    inline Pattern GetPattern(int id)
-    {
-        return Patterns[id];
-    }
+    inline int16_t GetCurrentPattern() { return current_pattern_; }
+    inline Pattern GetPattern(int id) { return Patterns[id]; }
 
     // Envelope methods
-    void SetAttack(float attack)
-    {
-        env_.SetTime(daisysp::ADSR_SEG_ATTACK, attack);
-    }
-    void SetDecay(float decay)
-    {
-        env_.SetTime(daisysp::ADSR_SEG_DECAY, decay);
-    }
-    void SetRelease(float release)
-    {
-        env_.SetTime(daisysp::ADSR_SEG_RELEASE, release);
-    }
+    void SetAttack(float attack) { env_.SetTime(daisysp::ADSR_SEG_ATTACK, attack); }
+    void SetDecay(float decay) { env_.SetTime(daisysp::ADSR_SEG_DECAY, decay); }
+    void SetRelease(float release) { env_.SetTime(daisysp::ADSR_SEG_RELEASE, release); }
 
   private:
     float CalcPhaseInc(float f);

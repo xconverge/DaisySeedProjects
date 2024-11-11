@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class AutoPanModule : public BaseEffectModule
-{
+class AutoPanModule : public BaseEffectModule {
   public:
     AutoPanModule();
     ~AutoPanModule();

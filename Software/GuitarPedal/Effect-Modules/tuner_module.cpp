@@ -15,8 +15,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
 };
 
 // Default Constructor
-TunerModule::TunerModule() : BaseEffectModule()
-{
+TunerModule::TunerModule() : BaseEffectModule() {
     // Setup the meta data reference for this Effect
     m_paramMetaData = s_metaData;
 
@@ -29,14 +28,12 @@ TunerModule::TunerModule() : BaseEffectModule()
 }
 
 // Destructor
-TunerModule::~TunerModule()
-{
+TunerModule::~TunerModule() {
     delete m_frequencyDetector;
     m_frequencyDetector = nullptr;
 }
 
-void TunerModule::Init(float sample_rate)
-{
+void TunerModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     m_muteOutput = GetParameterAsBool(0);
@@ -44,60 +41,39 @@ void TunerModule::Init(float sample_rate)
     m_frequencyDetector->Init(sample_rate);
 }
 
-float Pitch(uint8_t note)
-{
-    return 440.0f * pow(2.0f, (note - 'E') / 12.0f);
-}
+float Pitch(uint8_t note) { return 440.0f * pow(2.0f, (note - 'E') / 12.0f); }
 
-float Cents(float frequency, uint8_t note)
-{
-    return 1200.0f * log(frequency / Pitch(note)) / log(2.0f);
-}
+float Cents(float frequency, uint8_t note) { return 1200.0f * log(frequency / Pitch(note)) / log(2.0f); }
 
-uint8_t Note(float frequency)
-{
-    return round(12.0f * (log(frequency / 440.0f) / log(2.0f))) + 'E';
-}
+uint8_t Note(float frequency) { return round(12.0f * (log(frequency / 440.0f) / log(2.0f))) + 'E'; }
 
-uint8_t Octave(float frequency)
-{
-    return Note(frequency) / 12.0f - 1.0f;
-}
+uint8_t Octave(float frequency) { return Note(frequency) / 12.0f - 1.0f; }
 
-void TunerModule::ParameterChanged(int parameter_id)
-{
-    if (parameter_id == 0)
-    {
+void TunerModule::ParameterChanged(int parameter_id) {
+    if (parameter_id == 0) {
         m_muteOutput = GetParameterAsBool(0);
     }
 }
 
-void TunerModule::ProcessMono(float in)
-{
+void TunerModule::ProcessMono(float in) {
     m_currentFrequency = m_frequencyDetector->Process(in);
 
     m_note = Note(m_currentFrequency);
     m_octave = Octave(m_currentFrequency);
     m_cents = Cents(m_currentFrequency, m_note);
 
-    if (!m_muteOutput)
-    {
+    if (!m_muteOutput) {
         m_audioLeft = m_audioRight = in;
     }
 }
 
-void TunerModule::ProcessStereo(float inL, float inR)
-{
-    ProcessMono(inL);
-}
+void TunerModule::ProcessStereo(float inL, float inR) { ProcessMono(inL); }
 
 void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
-                         bool isEditing)
-{
+                         bool isEditing) {
     const bool displayTuning = m_currentFrequency > 0;
 
-    if (displayTuning)
-    {
+    if (displayTuning) {
         char currentNote[12];
         sprintf(currentNote, "%s", k_notes[m_note % 12]);
 
@@ -135,8 +111,7 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
 
     bool blockActive[blockCount] = {false};
 
-    if (displayTuning)
-    {
+    if (displayTuning) {
         // The center block is always active
         blockActive[inTuneBlockIndex] = true;
 
@@ -146,39 +121,27 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
         uint8_t blockChangeCount = std::max(numBlocksOutOfTuneToDisplay, static_cast<uint8_t>(1));
 
         // Only show no blocks out of tune if we are within the close threshold
-        if (std::abs(m_cents) < closeThreshold)
-        {
+        if (std::abs(m_cents) < closeThreshold) {
             blockChangeCount = 0;
         }
 
-        if (m_cents < 0)
-        {
+        if (m_cents < 0) {
             // Set the flat blocks state
-            for (int i = inTuneBlockIndex - 1; i >= 0; i--)
-            {
-                if (blockChangeCount > 0)
-                {
+            for (int i = inTuneBlockIndex - 1; i >= 0; i--) {
+                if (blockChangeCount > 0) {
                     blockActive[i] = true;
                     blockChangeCount--;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
-        }
-        else
-        {
+        } else {
             // Set the sharp blocks state
-            for (int i = inTuneBlockIndex + 1; i < blockCount; i++)
-            {
-                if (blockChangeCount > 0)
-                {
+            for (int i = inTuneBlockIndex + 1; i < blockCount; i++) {
+                if (blockChangeCount > 0) {
                     blockActive[i] = true;
                     blockChangeCount--;
-                }
-                else
-                {
+                } else {
                     break;
                 }
             }
@@ -187,24 +150,19 @@ void TunerModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int n
 
     // Display all of the blocks
     int x = 0;
-    for (int block = 0; block < blockCount; block++)
-    {
-        if (block == inTuneBlockIndex)
-        {
+    for (int block = 0; block < blockCount; block++) {
+        if (block == inTuneBlockIndex) {
             const int height = 20;
             Rectangle r(x, top - 5, blockWidth, height);
             display.DrawRect(r, true, blockActive[block]);
-        }
-        else
-        {
+        } else {
             Rectangle r(x, top, blockWidth, blockWidth);
             display.DrawRect(r, true, blockActive[block]);
         }
         x += blockWidth;
     }
 
-    if (displayTuning)
-    {
+    if (displayTuning) {
         char strbuffFreq[64];
         sprintf(strbuffFreq, FLT_FMT(2), FLT_VAR(2, m_currentFrequency));
         display.WriteStringAligned(strbuffFreq, Font_7x10, boundsToDrawIn, Alignment::bottomCentered, true);

@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class ReverbModule : public BaseEffectModule
-{
+class ReverbModule : public BaseEffectModule {
   public:
     ReverbModule();
     ~ReverbModule();

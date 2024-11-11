@@ -29,9 +29,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {{
                                                            }};
 
 // Default Constructor
-CrusherModule::CrusherModule()
-    : BaseEffectModule(), m_levelMin(0.01), m_levelMax(20), m_cutoffMin(500), m_cutoffMax(20000)
-{
+CrusherModule::CrusherModule() : BaseEffectModule(), m_levelMin(0.01), m_levelMax(20), m_cutoffMin(500), m_cutoffMax(20000) {
     // Set the name of the effect
     m_name = "Crusher";
 
@@ -43,21 +41,18 @@ CrusherModule::CrusherModule()
 }
 
 // Destructor
-CrusherModule::~CrusherModule()
-{
+CrusherModule::~CrusherModule() {
     // No Code Needed
 }
 
-void CrusherModule::Init(float sample_rate)
-{
+void CrusherModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
     m_tone.Init(sample_rate);
     m_bitcrusher.Init();
     m_bitcrusher.setNumberOfBits(32.0);
 }
 
-void CrusherModule::ProcessMono(float in)
-{
+void CrusherModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     float level = m_levelMin + (GetParameterAsMagnitude(0) * (m_levelMax - m_levelMin));
@@ -71,8 +66,7 @@ void CrusherModule::ProcessMono(float in)
     m_audioRight = m_audioLeft = out * level;
 }
 
-void CrusherModule::ProcessStereo(float inL, float inR)
-{
+void CrusherModule::ProcessStereo(float inL, float inR) {
     BaseEffectModule::ProcessStereo(inL, inR);
 
     float level = m_levelMin + (GetParameterAsMagnitude(0) * (m_levelMax - m_levelMin));

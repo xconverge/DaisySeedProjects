@@ -11,17 +11,11 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
-class Metronome
-{
+namespace bkshepherd {
+class Metronome {
   public:
-    Metronome()
-    {
-    }
-    ~Metronome()
-    {
-    }
+    Metronome() {}
+    ~Metronome() {}
     /** Initializes Metronome module.
         Arguments:
         - freq: frequency at which new clock signals will be generated
@@ -37,27 +31,18 @@ class Metronome
 
     /** resets phase to 0
      */
-    inline void Reset()
-    {
-        phs_ = 0.0f;
-    }
+    inline void Reset() { phs_ = 0.0f; }
     /** Sets frequency at which Metronome module will run at.
      */
     void SetFreq(float freq);
 
     /** Returns current value for frequency.
      */
-    inline float GetFreq()
-    {
-        return freq_;
-    }
+    inline float GetFreq() { return freq_; }
 
     /** Returns current phase.
      */
-    inline float GetPhase()
-    {
-        return phs_;
-    }
+    inline float GetPhase() { return phs_; }
 
     /** Returns the phase quadrant (0-4)
      */
@@ -72,16 +57,10 @@ class Metronome
     float phs_, sample_rate_, phs_inc_;
 };
 
-enum TimeSignature
-{
-    meter4x4 = 0,
-    meter3x4 = 1,
-    meter2x4 = 2
-};
+enum TimeSignature { meter4x4 = 0, meter3x4 = 1, meter2x4 = 2 };
 const uint16_t DefaultTempoBpm = 120;
 
-class MetroModule : public BaseEffectModule
-{
+class MetroModule : public BaseEffectModule {
   public:
     MetroModule();
     ~MetroModule();
@@ -96,14 +75,8 @@ class MetroModule : public BaseEffectModule
     void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
                 bool isEditing) override;
 
-    inline void SetTimeSignature(TimeSignature ts)
-    {
-        m_timeSignature = ts;
-    }
-    inline TimeSignature GetTimeSignature()
-    {
-        return m_timeSignature;
-    }
+    inline void SetTimeSignature(TimeSignature ts) { m_timeSignature = ts; }
+    inline TimeSignature GetTimeSignature() { return m_timeSignature; }
 
   private:
     uint16_t m_tempoBpmMin;

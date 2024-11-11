@@ -33,20 +33,13 @@ For details, see https://gery.casiez.net/1euro/
 
 #include <cmath>
 
-template <typename T = double> struct low_pass_filter
-{
-    low_pass_filter() : hatxprev(0), xprev(0), hadprev(false)
-    {
-    }
-    T operator()(T x, T alpha)
-    {
+template <typename T = double> struct low_pass_filter {
+    low_pass_filter() : hatxprev(0), xprev(0), hadprev(false) {}
+    T operator()(T x, T alpha) {
         T hatx;
-        if (hadprev)
-        {
+        if (hadprev) {
             hatx = alpha * x + (1 - alpha) * hatxprev;
-        }
-        else
-        {
+        } else {
             hatx = x;
             hadprev = true;
         }
@@ -59,19 +52,14 @@ template <typename T = double> struct low_pass_filter
     bool hadprev;
 };
 
-template <typename T = double, typename timestamp_t = double> struct one_euro_filter
-{
+template <typename T = double, typename timestamp_t = double> struct one_euro_filter {
     one_euro_filter(double _freq, T _mincutoff, T _beta, T _dcutoff)
-        : freq(_freq), mincutoff(_mincutoff), beta(_beta), dcutoff(_dcutoff), last_time_(-1)
-    {
-    }
+        : freq(_freq), mincutoff(_mincutoff), beta(_beta), dcutoff(_dcutoff), last_time_(-1) {}
 
-    T operator()(T x, timestamp_t t = -1)
-    {
+    T operator()(T x, timestamp_t t = -1) {
         T dx = 0;
 
-        if (last_time_ != -1 && t != -1 && t != last_time_ && t > last_time_)
-        {
+        if (last_time_ != -1 && t != -1 && t != last_time_ && t > last_time_) {
             freq = 1.0 / (t - last_time_);
         }
         last_time_ = t;
@@ -88,8 +76,7 @@ template <typename T = double, typename timestamp_t = double> struct one_euro_fi
     T mincutoff, beta, dcutoff;
 
   private:
-    T alpha(T cutoff)
-    {
+    T alpha(T cutoff) {
         T tau = 1.0 / (2 * M_PI * cutoff);
         T te = 1.0 / freq;
         return 1.0 / (1.0 + tau / te);

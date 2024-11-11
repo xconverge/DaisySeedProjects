@@ -3,33 +3,28 @@
 
 using namespace bkshepherd;
 
-void Metronome::Init(float freq, float sample_rate)
-{
+void Metronome::Init(float freq, float sample_rate) {
     freq_ = freq;
     phs_ = 0.0f;
     sample_rate_ = sample_rate;
     phs_inc_ = (TWOPI_F * freq_) / sample_rate_;
 }
 
-uint8_t Metronome::Process()
-{
+uint8_t Metronome::Process() {
     phs_ += phs_inc_;
-    if (phs_ >= TWOPI_F)
-    {
+    if (phs_ >= TWOPI_F) {
         phs_ -= TWOPI_F;
         return 1;
     }
     return 0;
 }
 
-void Metronome::SetFreq(float freq)
-{
+void Metronome::SetFreq(float freq) {
     freq_ = freq;
     phs_inc_ = (TWOPI_F * freq_) / sample_rate_;
 }
 
-uint16_t Metronome::GetQuadrant()
-{
+uint16_t Metronome::GetQuadrant() {
     if (phs_ < PI_F / 2.0)
         return 0;
     else if (phs_ >= PI_F / 2.0 && phs_ < PI_F)
@@ -40,8 +35,7 @@ uint16_t Metronome::GetQuadrant()
         return 3;
 }
 
-uint16_t Metronome::GetQuadrant16()
-{
+uint16_t Metronome::GetQuadrant16() {
     float phase = phs_;
     if (phase > TWOPI_F)
         phase = TWOPI_F;
@@ -81,9 +75,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {{
                                                            }};
 
 // Default Constructor
-MetroModule::MetroModule()
-    : BaseEffectModule(), m_tempoBpmMin(40), m_tempoBpmMax(200), m_levelMin(0.0f), m_levelMax(1.0f)
-{
+MetroModule::MetroModule() : BaseEffectModule(), m_tempoBpmMin(40), m_tempoBpmMax(200), m_levelMin(0.0f), m_levelMax(1.0f) {
     // Set the name of the effect
     m_name = "Metronome";
 
@@ -95,13 +87,11 @@ MetroModule::MetroModule()
 }
 
 // Destructor
-MetroModule::~MetroModule()
-{
+MetroModule::~MetroModule() {
     // No Code Needed
 }
 
-void MetroModule::Init(float sample_rate)
-{
+void MetroModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
     m_quadrant = 0;
     m_direction = 0;
@@ -126,8 +116,7 @@ void MetroModule::Init(float sample_rate)
     m_metro.Init(freq, sample_rate);
 }
 
-float MetroModule::Process()
-{
+float MetroModule::Process() {
     const int tempoRaw = GetParameterRaw(0);
     const uint16_t tempo = raw_tempo_to_bpm(tempoRaw);
     const float freq = tempo_to_freq(tempo);
@@ -139,8 +128,7 @@ float MetroModule::Process()
     if (freq != m_metro.GetFreq())
         m_metro.SetFreq(freq);
 
-    if (m_metro.Process())
-    {
+    if (m_metro.Process()) {
         m_beat++;
         m_osc.SetFreq((m_beat % (TimeSignatureBase[static_cast<uint16_t>(m_timeSignature)]) == 0) ? 440.0f : 220.0f);
         m_direction = !m_direction;
@@ -153,8 +141,7 @@ float MetroModule::Process()
     return sig * env_out;
 }
 
-void MetroModule::ProcessMono(float in)
-{
+void MetroModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
     float sig = Process();
     // Adjust the level
@@ -163,8 +150,7 @@ void MetroModule::ProcessMono(float in)
     m_audioRight = m_audioLeft;
 }
 
-void MetroModule::ProcessStereo(float inL, float inR)
-{
+void MetroModule::ProcessStereo(float inL, float inR) {
     BaseEffectModule::ProcessStereo(inL, inR);
     float sig = Process();
     // Adjust the level
@@ -173,30 +159,21 @@ void MetroModule::ProcessStereo(float inL, float inR)
     m_audioRight = sig * level + inR * (1.0f - level);
 }
 
-void MetroModule::SetTempo(uint32_t bpm)
-{
-    SetParameterRaw(0, bpm_tempo_to_raw(bpm));
-}
+void MetroModule::SetTempo(uint32_t bpm) { SetParameterRaw(0, bpm_tempo_to_raw(bpm)); }
 
-float MetroModule::GetBrightnessForLED(int led_id)
-{
+float MetroModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return 1.0f - (m_quadrant / 16.0);
     }
 
     return value;
 }
 
-uint16_t MetroModule::raw_tempo_to_bpm(uint8_t value)
-{
-    return m_tempoBpmMin + (value * (m_tempoBpmMax - m_tempoBpmMin) / 127);
-}
+uint16_t MetroModule::raw_tempo_to_bpm(uint8_t value) { return m_tempoBpmMin + (value * (m_tempoBpmMax - m_tempoBpmMin) / 127); }
 
-uint8_t MetroModule::bpm_tempo_to_raw(uint16_t bpm)
-{
+uint8_t MetroModule::bpm_tempo_to_raw(uint16_t bpm) {
     if (bpm > m_tempoBpmMax)
         bpm = m_tempoBpmMax;
     else if (bpm < m_tempoBpmMin)
@@ -208,8 +185,7 @@ uint8_t MetroModule::bpm_tempo_to_raw(uint16_t bpm)
 }
 
 void MetroModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
-                         bool isEditing)
-{
+                         bool isEditing) {
     BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);
 
     // Show tempo in BPM

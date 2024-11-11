@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class ChorusModule : public BaseEffectModule
-{
+class ChorusModule : public BaseEffectModule {
   public:
     ChorusModule();
     ~ChorusModule();

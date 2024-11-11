@@ -7,12 +7,9 @@
 
 using namespace cycfi::q;
 
-FrequencyDetectorQ::FrequencyDetectorQ()
-{
-}
+FrequencyDetectorQ::FrequencyDetectorQ() {}
 
-FrequencyDetectorQ::~FrequencyDetectorQ()
-{
+FrequencyDetectorQ::~FrequencyDetectorQ() {
     delete m_pitchDetector;
     m_pitchDetector = nullptr;
 
@@ -20,8 +17,7 @@ FrequencyDetectorQ::~FrequencyDetectorQ()
     m_preProcessor = nullptr;
 }
 
-void FrequencyDetectorQ::Init(float sampleRate)
-{
+void FrequencyDetectorQ::Init(float sampleRate) {
     // The frequency detection bounds;
     frequency lowest_frequency = cycfi::q::pitch_names::C[2];
     frequency highest_frequency = cycfi::q::pitch_names::C[5];
@@ -32,8 +28,7 @@ void FrequencyDetectorQ::Init(float sampleRate)
     m_preProcessor = new signal_conditioner{preprocessor_config, lowest_frequency, highest_frequency, sampleRate};
 }
 
-float FrequencyDetectorQ::Process(float in)
-{
+float FrequencyDetectorQ::Process(float in) {
     // Pre-process the signal for pitch detection
     float preProcessedSignal = m_preProcessor->operator()(in);
 
@@ -41,8 +36,7 @@ float FrequencyDetectorQ::Process(float in)
     const bool ready = m_pitchDetector->operator()(preProcessedSignal);
 
     // If result is ready, get the detected frequency
-    if (ready)
-    {
+    if (ready) {
         const float freq = m_pitchDetector->get_frequency();
 
         // Run a smoothing filter on the detected frequency

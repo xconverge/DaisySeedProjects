@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class ModulatedTremoloModule : public BaseEffectModule
-{
+class ModulatedTremoloModule : public BaseEffectModule {
   public:
     ModulatedTremoloModule();
     ~ModulatedTremoloModule();

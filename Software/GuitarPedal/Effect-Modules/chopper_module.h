@@ -12,11 +12,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class ChopperModule : public BaseEffectModule
-{
+class ChopperModule : public BaseEffectModule {
   public:
     ChopperModule();
     ~ChopperModule();

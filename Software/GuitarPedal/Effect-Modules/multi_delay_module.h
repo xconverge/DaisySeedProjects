@@ -11,11 +11,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class MultiDelayModule : public BaseEffectModule
-{
+class MultiDelayModule : public BaseEffectModule {
   public:
     MultiDelayModule();
     ~MultiDelayModule();

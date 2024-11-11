@@ -11,11 +11,9 @@ const int kNumMainMenuItems = 3;
 const int kNumGlobalSettingsMenuItems = 7;
 const int kNumPresetSettingsItems = 3;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class GuitarPedalUI
-{
+class GuitarPedalUI {
   public:
     GuitarPedalUI();
     virtual ~GuitarPedalUI();

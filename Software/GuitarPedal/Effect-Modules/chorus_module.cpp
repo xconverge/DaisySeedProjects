@@ -45,7 +45,8 @@ static const ParameterMetaData s_metaData[s_paramCount] = {{
                                                            }};
 
 // Default Constructor
-ChorusModule::ChorusModule() : BaseEffectModule(), m_lfoFreqMin(1.0f), m_lfoFreqMax(20.0f)
+ChorusModule::ChorusModule()
+    : BaseEffectModule(), m_lfoFreqMin(1.0f), m_lfoFreqMax(20.0f)
 
 {
     // Set the name of the effect
@@ -59,38 +60,32 @@ ChorusModule::ChorusModule() : BaseEffectModule(), m_lfoFreqMin(1.0f), m_lfoFreq
 }
 
 // Destructor
-ChorusModule::~ChorusModule()
-{
+ChorusModule::~ChorusModule() {
     // No Code Needed
 }
 
-void ChorusModule::Init(float sample_rate)
-{
+void ChorusModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     m_chorus.Init(sample_rate);
 }
 
-void ChorusModule::ProcessMono(float in)
-{
+void ChorusModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     // Calculate the effect
     m_chorus.SetDelay(GetParameterAsMagnitude(1));
-    m_chorus.SetLfoFreq(m_lfoFreqMin +
-                        (GetParameterAsMagnitude(2) * GetParameterAsMagnitude(2) * (m_lfoFreqMax - m_lfoFreqMin)));
+    m_chorus.SetLfoFreq(m_lfoFreqMin + (GetParameterAsMagnitude(2) * GetParameterAsMagnitude(2) * (m_lfoFreqMax - m_lfoFreqMin)));
     m_chorus.SetLfoDepth(GetParameterAsMagnitude(3));
     m_chorus.SetFeedback(GetParameterAsMagnitude(4));
 
     m_chorus.Process(m_audioLeft);
 
     m_audioLeft = m_chorus.GetLeft() * GetParameterAsMagnitude(0) + m_audioLeft * (1.0f - GetParameterAsMagnitude(0));
-    m_audioRight =
-        m_chorus.GetRight() * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
+    m_audioRight = m_chorus.GetRight() * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
 }
 
-void ChorusModule::ProcessStereo(float inL, float inR)
-{
+void ChorusModule::ProcessStereo(float inL, float inR) {
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -98,16 +93,13 @@ void ChorusModule::ProcessStereo(float inL, float inR)
     BaseEffectModule::ProcessStereo(m_audioLeft, inR);
 
     // Calculate the effect
-    m_audioRight =
-        m_chorus.GetRight() * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
+    m_audioRight = m_chorus.GetRight() * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
 }
 
-float ChorusModule::GetBrightnessForLED(int led_id)
-{
+float ChorusModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return value * GetParameterAsMagnitude(0);
     }
 

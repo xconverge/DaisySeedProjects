@@ -66,13 +66,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         midiCCMapping : -1
     },
     {name : "IR Enabled", valueType : ParameterValueType::Bool, defaultValue : 0, knobMapping : 5, midiCCMapping : -1},
-    {
-        name : "Amp Enabled",
-        valueType : ParameterValueType::Bool,
-        defaultValue : 127,
-        knobMapping : -1,
-        midiCCMapping : -1
-    },
+    {name : "Amp Enabled", valueType : ParameterValueType::Bool, defaultValue : 127, knobMapping : -1, midiCCMapping : -1},
 };
 
 // Neural Network Model
@@ -94,9 +88,7 @@ ImpulseResponse IR;
 
 // Default Constructor
 NeuralAmpIRModule::NeuralAmpIRModule()
-    : BaseEffectModule(), m_gainMin(0.0f), m_gainMax(2.0f), m_levelMin(0.0f), m_levelMax(1.0f), m_cutoffMin(500),
-      m_cutoffMax(20000)
-{
+    : BaseEffectModule(), m_gainMin(0.0f), m_gainMax(2.0f), m_levelMin(0.0f), m_levelMax(1.0f), m_cutoffMin(500), m_cutoffMax(20000) {
     // Set the name of the effect
     m_name = "Amp";
 
@@ -108,13 +100,11 @@ NeuralAmpIRModule::NeuralAmpIRModule()
 }
 
 // Destructor
-NeuralAmpIRModule::~NeuralAmpIRModule()
-{
+NeuralAmpIRModule::~NeuralAmpIRModule() {
     // No Code Needed
 }
 
-void NeuralAmpIRModule::Init(float sample_rate)
-{
+void NeuralAmpIRModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     // in the model data .h file
@@ -130,35 +120,23 @@ void NeuralAmpIRModule::Init(float sample_rate)
     CalculateTone();
 }
 
-void NeuralAmpIRModule::ParameterChanged(int parameter_id)
-{
-    if (parameter_id == 3)
-    { // Change Model
+void NeuralAmpIRModule::ParameterChanged(int parameter_id) {
+    if (parameter_id == 3) { // Change Model
         SelectModel();
-    }
-    else if (parameter_id == 1)
-    {
+    } else if (parameter_id == 1) {
         CalculateTone();
-    }
-    else if (parameter_id == 4)
-    { // Change IR
+    } else if (parameter_id == 4) { // Change IR
         SelectIR();
-    }
-    else if (parameter_id == 5)
-    { // IR Enabled
+    } else if (parameter_id == 5) { // IR Enabled
         m_irEnabled = GetParameterAsBool(5);
-    }
-    else if (parameter_id == 6)
-    { // Amp Enabled
+    } else if (parameter_id == 6) { // Amp Enabled
         m_ampEnabled = GetParameterAsBool(6);
     }
 }
 
-void NeuralAmpIRModule::SelectModel()
-{
+void NeuralAmpIRModule::SelectModel() {
     const int modelIndex = GetParameterAsBinnedValue(3) - 1;
-    if (modelIndex != m_currentModelIndex)
-    {
+    if (modelIndex != m_currentModelIndex) {
         auto &gru = (model).template get<0>();
         auto &dense = (model).template get<1>();
         gru.setWVals(model_collection[modelIndex].rec_weight_ih_l0);
@@ -172,26 +150,21 @@ void NeuralAmpIRModule::SelectModel()
     }
 }
 
-void NeuralAmpIRModule::SelectIR()
-{
+void NeuralAmpIRModule::SelectIR() {
     const int irIndex = GetParameterAsBinnedValue(4) - 1;
-    if (irIndex != m_currentIRIndex)
-    {
+    if (irIndex != m_currentIRIndex) {
         IR.Init(ir_collection[irIndex]);
         m_currentIRIndex = irIndex;
     }
 }
 
-void NeuralAmpIRModule::CalculateTone()
-{
+void NeuralAmpIRModule::CalculateTone() {
     // Set low pass filter as exponential taper
-    const float cutoff =
-        m_cutoffMin + GetParameterAsMagnitude(1) * GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
+    const float cutoff = m_cutoffMin + GetParameterAsMagnitude(1) * GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
     m_tone.SetFreq(cutoff);
 }
 
-void NeuralAmpIRModule::ProcessMono(float in)
-{
+void NeuralAmpIRModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     // Neural Net Input
@@ -203,15 +176,12 @@ void NeuralAmpIRModule::ProcessMono(float in)
 
     // Process Neural Net Model
     float ampOut = 0.0;
-    if (m_ampEnabled)
-    {
+    if (m_ampEnabled) {
         ampOut = model.forward(input_arr) + input_arr[0];
 
         // Level adjustment
         ampOut *= m_nnLevelAdjust;
-    }
-    else
-    {
+    } else {
         ampOut = input_arr[0];
     }
 
@@ -221,13 +191,10 @@ void NeuralAmpIRModule::ProcessMono(float in)
     // Impulse Response
     float impulse_out = 0.0;
 
-    if (m_irEnabled)
-    {
+    if (m_irEnabled) {
         // 0.2 is level adjust for loud output
         impulse_out = IR.Process(filter_out) * 0.2;
-    }
-    else
-    {
+    } else {
         impulse_out = filter_out;
     }
 
@@ -237,8 +204,7 @@ void NeuralAmpIRModule::ProcessMono(float in)
     m_audioRight = m_audioLeft;
 }
 
-void NeuralAmpIRModule::ProcessStereo(float inL, float inR)
-{
+void NeuralAmpIRModule::ProcessStereo(float inL, float inR) {
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -248,12 +214,10 @@ void NeuralAmpIRModule::ProcessStereo(float inL, float inR)
     //       input is ignored in this effect module.
 }
 
-float NeuralAmpIRModule::GetBrightnessForLED(int led_id)
-{
+float NeuralAmpIRModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return value * GetParameterAsMagnitude(0);
     }
 

@@ -13,11 +13,9 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class TunerModule : public BaseEffectModule
-{
+class TunerModule : public BaseEffectModule {
   public:
     TunerModule();
     ~TunerModule();

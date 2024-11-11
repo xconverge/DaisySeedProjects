@@ -6,17 +6,14 @@
 #include "1efilter.hpp"
 #include "frequency_detector_interface.h"
 
-namespace cycfi
-{
-namespace q
-{
+namespace cycfi {
+namespace q {
 class pitch_detector;
 class signal_conditioner;
 } // namespace q
 } // namespace cycfi
 
-class FrequencyDetectorQ : public FrequencyDetectorInterface
-{
+class FrequencyDetectorQ : public FrequencyDetectorInterface {
   public:
     FrequencyDetectorQ();
     virtual ~FrequencyDetectorQ();

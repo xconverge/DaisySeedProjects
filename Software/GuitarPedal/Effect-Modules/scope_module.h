@@ -11,13 +11,11 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
 const uint16_t ScreenWidth = 128;
 
-class ScopeModule : public BaseEffectModule
-{
+class ScopeModule : public BaseEffectModule {
   public:
     ScopeModule();
     ~ScopeModule();

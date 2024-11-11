@@ -11,37 +11,21 @@
 
 using namespace daisysp;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class Bitcrusher
-{
+class Bitcrusher {
   public:
-    Bitcrusher()
-    {
-    }
-    ~Bitcrusher()
-    {
-    }
+    Bitcrusher() {}
+    ~Bitcrusher() {}
 
-    void Init()
-    {
-        quant = 65536.0;
-    } // need some default value
+    void Init() { quant = 65536.0; } // need some default value
 
-    float Process(float in)
-    {
-        return truncf(in * quant) / quant;
-    }
+    float Process(float in) { return truncf(in * quant) / quant; }
 
-    void setNumberOfBits(float nBits)
-    {
-        if (nBits < 1.0)
-        {
+    void setNumberOfBits(float nBits) {
+        if (nBits < 1.0) {
             nBits = 1.0;
-        }
-        else if (nBits > 32.0)
-        {
+        } else if (nBits > 32.0) {
             nBits = 32.0;
         }
         quant = powf(2.0, nBits);
@@ -51,8 +35,7 @@ class Bitcrusher
     float quant;
 };
 
-class CrusherModule : public BaseEffectModule
-{
+class CrusherModule : public BaseEffectModule {
   public:
     CrusherModule();
     ~CrusherModule();

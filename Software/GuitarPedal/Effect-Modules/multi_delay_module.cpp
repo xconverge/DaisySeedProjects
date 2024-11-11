@@ -13,14 +13,12 @@ DelayLine<float, MAX_DELAY_TAP> DSY_SDRAM_BSS delayLineLeft0;
 DelayLine<float, MAX_DELAY_TAP> DSY_SDRAM_BSS delayLineRight0;
 
 float tap_delays[4] = {0.0f, 0.0f, 0.0f, 0.0f};
-struct delay
-{
+struct delay {
     DelayLine<float, MAX_DELAY_TAP> *del;
     float currentDelay;
     float delayTarget;
 
-    float Process(float feedback, float in)
-    {
+    float Process(float feedback, float in) {
         // set delay times
         fonepole(currentDelay, delayTarget, .0002f);
         del->SetDelay(currentDelay);
@@ -178,8 +176,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {{
 // Default Constructor
 MultiDelayModule::MultiDelayModule()
     : BaseEffectModule(), m_isInitialized(false), m_cachedEffectMagnitudeValue(1.0f), m_delaySamplesMin(0.0f),
-      m_delaySamplesMax(192000.0f), m_pitchShiftMin(-12.0f), m_pitchShiftMax(12.0f)
-{
+      m_delaySamplesMax(192000.0f), m_pitchShiftMin(-12.0f), m_pitchShiftMax(12.0f) {
     // Set the name of the effect
     m_name = "Multi Delay";
 
@@ -193,13 +190,11 @@ MultiDelayModule::MultiDelayModule()
 }
 
 // Destructor
-MultiDelayModule::~MultiDelayModule()
-{
+MultiDelayModule::~MultiDelayModule() {
     // No Code Needed
 }
 
-void MultiDelayModule::Init(float sample_rate)
-{
+void MultiDelayModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
     delayLineLeft0.Init();
     delayLineRight0.Init();
@@ -208,71 +203,51 @@ void MultiDelayModule::Init(float sample_rate)
     delays[1].del = &delayLineRight0;
     delays[1].currentDelay = GetParameterAsMagnitude(2);
 
-    for (int i = 0; i < 4; ++i)
-    {
+    for (int i = 0; i < 4; ++i) {
         ps_taps[i].Init(sample_rate);
     }
 }
 
-void MultiDelayModule::ParameterChanged(int parameter_id)
-{
-    if (parameter_id == 1)
-    {
+void MultiDelayModule::ParameterChanged(int parameter_id) {
+    if (parameter_id == 1) {
         delays[0].delayTarget = 48.0f * GetParameterAsFloat(1);
-        if (GetParameterAsBinnedValue(4) == 1)
-        {
+        if (GetParameterAsBinnedValue(4) == 1) {
             SetTargetTapDelayTime(0, delays[0].delayTarget, 2.0f);
             SetTargetTapDelayTime(1, delays[0].delayTarget, 4.0f);
         }
-    }
-    else if (parameter_id == 2)
-    {
+    } else if (parameter_id == 2) {
         delays[1].delayTarget = 48.0f * GetParameterAsFloat(2);
-        if (GetParameterAsBinnedValue(4) == 1)
-        {
+        if (GetParameterAsBinnedValue(4) == 1) {
             SetTargetTapDelayTime(2, delays[1].delayTarget, 2.0f);
             SetTargetTapDelayTime(3, delays[1].delayTarget, 4.0f);
         }
-    }
-    else if (parameter_id == 4)
-    {
-        if (GetParameterAsBinnedValue(parameter_id) == 1)
-        {
+    } else if (parameter_id == 4) {
+        if (GetParameterAsBinnedValue(parameter_id) == 1) {
             SetTargetTapDelayTime(0, delays[0].delayTarget, 2.0f);
             SetTargetTapDelayTime(1, delays[0].delayTarget, 4.0f);
             SetTargetTapDelayTime(2, delays[1].delayTarget, 2.0f);
             SetTargetTapDelayTime(3, delays[1].delayTarget, 4.0f);
         }
-    }
-    else if (parameter_id > 4 && parameter_id < 9 && m_isInitialized == true)
-    {
-        ps_taps[parameter_id - 5].SetTransposition(m_pitchShiftMin + (m_pitchShiftMax - m_pitchShiftMin) *
-                                                                         GetParameterAsMagnitude(parameter_id));
-    }
-    else if (parameter_id > 8 && parameter_id < 11)
-    {
+    } else if (parameter_id > 4 && parameter_id < 9 && m_isInitialized == true) {
+        ps_taps[parameter_id - 5].SetTransposition(m_pitchShiftMin +
+                                                   (m_pitchShiftMax - m_pitchShiftMin) * GetParameterAsMagnitude(parameter_id));
+    } else if (parameter_id > 8 && parameter_id < 11) {
         m_tapTargetDelay[parameter_id - 9] = 48.0f * GetParameterAsFloat(parameter_id);
     }
 }
 
-void MultiDelayModule::SetTargetTapDelayTime(uint8_t index, float value, float multiplier)
-{
+void MultiDelayModule::SetTargetTapDelayTime(uint8_t index, float value, float multiplier) {
     m_tapTargetDelay[index] = value * multiplier;
 }
 
-void PreProcessTaps(float *current, float target)
-{
-    fonepole(*current, target, .0002f);
-}
+void PreProcessTaps(float *current, float target) { fonepole(*current, target, .0002f); }
 
-void MultiDelayModule::ProcessMono(float in)
-{
+void MultiDelayModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     float taps[2];
     float sig = delays[0].Process(GetParameterAsMagnitude(3), m_audioLeft) / 3.f;
-    for (int i = 0; i < 2; ++i)
-    {
+    for (int i = 0; i < 2; ++i) {
         PreProcessTaps(&tap_delays[i], m_tapTargetDelay[i]);
         taps[i] = delays[0].del->Read(tap_delays[i]);
         // temporary workaround, only process one pitch shifter for now, using all 4 causes right channel to be silent.
@@ -286,8 +261,7 @@ void MultiDelayModule::ProcessMono(float in)
     m_audioRight = m_audioLeft;
 }
 
-void MultiDelayModule::ProcessStereo(float inL, float inR)
-{
+void MultiDelayModule::ProcessStereo(float inL, float inR) {
     // Calculate the mono effect
     ProcessMono(inL);
     inR = inL;
@@ -295,8 +269,7 @@ void MultiDelayModule::ProcessStereo(float inL, float inR)
     BaseEffectModule::ProcessStereo(m_audioLeft, inR);
     float taps[2];
     float sig = delays[1].Process(GetParameterAsMagnitude(3), m_audioRight) / 3.f;
-    for (int i = 0; i < 2; ++i)
-    {
+    for (int i = 0; i < 2; ++i) {
         PreProcessTaps(&tap_delays[i + 2], m_tapTargetDelay[i + 2]);
         taps[i] = delays[1].del->Read(tap_delays[i + 2]);
         // temporary workaround, only process one pitch shifter for now, using all 4 causes right channel to be silent.
@@ -308,17 +281,14 @@ void MultiDelayModule::ProcessStereo(float inL, float inR)
     m_audioRight = sig * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
 }
 
-void MultiDelayModule::SetTempo(uint32_t bpm)
-{
+void MultiDelayModule::SetTempo(uint32_t bpm) {
     // TODO: Add Tempo handling
 }
 
-float MultiDelayModule::GetBrightnessForLED(int led_id)
-{
+float MultiDelayModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return value * m_cachedEffectMagnitudeValue;
     }
 

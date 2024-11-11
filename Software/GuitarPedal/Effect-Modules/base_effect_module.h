@@ -11,12 +11,10 @@
 
 using namespace daisy;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
 /** Parameter Value Types */
-enum ParameterValueType
-{
+enum ParameterValueType {
     Raw,                     // Raw Parameter Value (0 .. 127)
     FloatMagnitude,          // Float Magnitude Value (0.0f - 1.0f)
     Bool,                    // Boolean Value
@@ -27,8 +25,7 @@ enum ParameterValueType
 // Meta data for an individual Effect Parameter.  Effects may have zero or more
 // Parameters. This data structure contains information about the Effect
 // Parameter.
-struct ParameterMetaData
-{
+struct ParameterMetaData {
     const char *name;             // The Name of this Parameter that gets displayed on the
                                   // Screen when editing the parameters value
     ParameterValueType valueType; // The Type of this Parameter value.
@@ -47,8 +44,7 @@ struct ParameterMetaData
                                   // fineStepSize multiple in the menu
 };
 
-class BaseEffectModule
-{
+class BaseEffectModule {
   public:
     BaseEffectModule();
     virtual ~BaseEffectModule();
@@ -244,8 +240,7 @@ class BaseEffectModule
      * @param isEditing         True if the enter button was pressed and the value
      * is being edited directly.
      */
-    virtual void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
-                        bool isEditing);
+    virtual void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn, bool isEditing);
 
     /** Gets the minimum value for the parameter
         \param parameter_id Id of the parameter to set (0 .. m_paramCount - 1).
@@ -283,10 +278,7 @@ class BaseEffectModule
      *  \return Value True if the Effect uses the alternate footswitch for tap
      * tempo
      */
-    virtual bool AlternateFootswitchForTempo() const
-    {
-        return true;
-    };
+    virtual bool AlternateFootswitchForTempo() const { return true; };
     /** Overridable callback when alternate footswitch is pressed */
     virtual void AlternateFootswitchPressed(){};
     /** Overridable callback when alternate footswitch is released */

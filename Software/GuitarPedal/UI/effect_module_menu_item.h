@@ -7,11 +7,9 @@
 
 using namespace daisy;
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class EffectModuleMenuItem : public daisy::AbstractMenu::CustomItem
-{
+class EffectModuleMenuItem : public daisy::AbstractMenu::CustomItem {
   public:
     EffectModuleMenuItem();
     virtual ~EffectModuleMenuItem();
@@ -56,8 +54,7 @@ class EffectModuleMenuItem : public daisy::AbstractMenu::CustomItem
      * @param boundsToDrawIn    The Rectangle to draw the item into
      * @param isEditing         True if the enter button was pressed and the value is being edited directly.
      */
-    void Draw(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
-              bool isEditing) override;
+    void Draw(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn, bool isEditing) override;
 
   private:
     UI *m_parentUI;

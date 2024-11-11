@@ -36,21 +36,18 @@ OverdriveModule::OverdriveModule()
 }
 
 // Destructor
-OverdriveModule::~OverdriveModule()
-{
+OverdriveModule::~OverdriveModule() {
     // No Code Needed
 }
 
-void OverdriveModule::Init(float sample_rate)
-{
+void OverdriveModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     m_overdriveLeft.Init();
     m_overdriveRight.Init();
 }
 
-void OverdriveModule::ProcessMono(float in)
-{
+void OverdriveModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     // Calculate the effect
@@ -62,8 +59,7 @@ void OverdriveModule::ProcessMono(float in)
     m_audioRight = m_audioLeft;
 }
 
-void OverdriveModule::ProcessStereo(float inL, float inR)
-{
+void OverdriveModule::ProcessStereo(float inL, float inR) {
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -78,12 +74,10 @@ void OverdriveModule::ProcessStereo(float inL, float inR)
     m_audioRight = m_audioRight * (m_levelMin + (GetParameterAsMagnitude(1) * (m_levelMax - m_levelMin)));
 }
 
-float OverdriveModule::GetBrightnessForLED(int led_id)
-{
+float OverdriveModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return value * GetParameterAsMagnitude(0);
     }
 

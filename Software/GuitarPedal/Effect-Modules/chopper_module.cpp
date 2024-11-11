@@ -54,20 +54,17 @@ ChopperModule::ChopperModule()
 }
 
 // Destructor
-ChopperModule::~ChopperModule()
-{
+ChopperModule::~ChopperModule() {
     // No Code Needed
 }
 
-void ChopperModule::Init(float sample_rate)
-{
+void ChopperModule::Init(float sample_rate) {
     BaseEffectModule::Init(sample_rate);
 
     m_chopper.Init(sample_rate);
 }
 
-void ChopperModule::ProcessMono(float in)
-{
+void ChopperModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
 
     // Setup the Effect
@@ -87,8 +84,7 @@ void ChopperModule::ProcessMono(float in)
     m_audioRight = m_audioLeft;
 }
 
-void ChopperModule::ProcessStereo(float inL, float inR)
-{
+void ChopperModule::ProcessStereo(float inL, float inR) {
     // Calculate the mono effect
     ProcessMono(inL);
 
@@ -103,43 +99,34 @@ void ChopperModule::ProcessStereo(float inL, float inR)
     m_audioRight = audioRightWet * GetParameterAsMagnitude(0) + m_audioRight * (1.0f - GetParameterAsMagnitude(0));
 }
 
-void ChopperModule::SetTempo(uint32_t bpm)
-{
+void ChopperModule::SetTempo(uint32_t bpm) {
     float freq = tempo_to_freq(bpm);
 
     // Adjust the frequency into a range that makes sense for the effect
     freq = freq / 4.0f;
 
-    if (freq <= m_tempoFreqMin)
-    {
+    if (freq <= m_tempoFreqMin) {
         SetParameterRaw(1, 0);
-    }
-    else if (freq >= m_tempoFreqMax)
-    {
+    } else if (freq >= m_tempoFreqMax) {
         SetParameterRaw(1, 127);
-    }
-    else
-    {
+    } else {
         // Get the parameter as close as we can to target tempo
         SetParameterRaw(1, ((freq - m_tempoFreqMin) / (m_tempoFreqMax - m_tempoFreqMin)) * 128);
     }
 }
 
-float ChopperModule::GetBrightnessForLED(int led_id)
-{
+float ChopperModule::GetBrightnessForLED(int led_id) {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
-    if (led_id == 1)
-    {
+    if (led_id == 1) {
         return value * m_cachedEffectMagnitudeValue;
     }
 
     return value;
 }
 
-void ChopperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal,
-                           Rectangle boundsToDrawIn, bool isEditing)
-{
+void ChopperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
+                           bool isEditing) {
     BaseEffectModule::DrawUI(display, currentIndex, numItemsTotal, boundsToDrawIn, isEditing);
 
     Pattern pattern = m_chopper.GetPattern(GetParameterAsBinnedValue(3) - 1);
@@ -148,29 +135,24 @@ void ChopperModule::DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int
     int top = 30;
 
     int x = 0;
-    for (int step = 0; step < pattern.length; step++)
-    {
+    for (int step = 0; step < pattern.length; step++) {
         Note note = pattern.notes[step];
-        switch (note.duration)
-        {
+        switch (note.duration) {
         case NoteDuration::D16: {
             Rectangle r(x, top, stepWidth - 2, stepWidth - 2);
             display.DrawRect(r, true, note.active);
             x += stepWidth;
-        }
-        break;
+        } break;
         case NoteDuration::D8: {
             Rectangle r(x, top, stepWidth * 2 - 2, stepWidth - 2);
             display.DrawRect(r, true, note.active);
             x += stepWidth * 2;
-        }
-        break;
+        } break;
         case NoteDuration::D4: {
             Rectangle r(x, top, stepWidth * 4 - 2, stepWidth - 2);
             display.DrawRect(r, true, note.active);
             x += stepWidth * 4;
-        }
-        break;
+        } break;
         }
     }
 }

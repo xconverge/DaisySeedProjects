@@ -9,11 +9,9 @@
 
 /** @file pitch_shifter_module.h */
 
-namespace bkshepherd
-{
+namespace bkshepherd {
 
-class PitchShifterModule : public BaseEffectModule
-{
+class PitchShifterModule : public BaseEffectModule {
   public:
     PitchShifterModule();
     ~PitchShifterModule();
@@ -23,10 +21,7 @@ class PitchShifterModule : public BaseEffectModule
     void ProcessStereo(float inL, float inR) override;
     void ParameterChanged(int parameter_id) override;
 
-    bool AlternateFootswitchForTempo() const override
-    {
-        return false;
-    }
+    bool AlternateFootswitchForTempo() const override { return false; }
     void AlternateFootswitchPressed() override;
     void AlternateFootswitchReleased() override;
     void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,

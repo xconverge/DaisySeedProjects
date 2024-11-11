@@ -14,23 +14,21 @@ History::History() {}
 
 // Destructor
 History::~History() {
-  // No Code Needed
+    // No Code Needed
 }
 
-void History::_AdvanceHistoryIndex(const size_t bufferSize) {
-  mHistoryIndex += bufferSize;
-}
+void History::_AdvanceHistoryIndex(const size_t bufferSize) { mHistoryIndex += bufferSize; }
 
 void History::_RewindHistory() {
-  // TODO memcpy?  Should be fine w/ history array being >2x the history length.
-  for (size_t i = 0, j = mHistoryIndex - mHistoryRequired; i < mHistoryRequired;
-       i++, j++)
-    mHistory[i] = mHistory[j];
-  mHistoryIndex = mHistoryRequired;
+    // TODO memcpy?  Should be fine w/ history array being >2x the history length.
+    for (size_t i = 0, j = mHistoryIndex - mHistoryRequired; i < mHistoryRequired; i++, j++)
+        mHistory[i] = mHistory[j];
+    mHistoryIndex = mHistoryRequired;
 }
 
 void History::_UpdateHistory(float inputs) {
-  if (mHistoryIndex + 1 >= mHistory.size()) _RewindHistory();
+    if (mHistoryIndex + 1 >= mHistory.size())
+        _RewindHistory();
 
-  mHistory[mHistoryIndex] = inputs;
+    mHistory[mHistoryIndex] = inputs;
 }

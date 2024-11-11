@@ -20,27 +20,27 @@
 #include "dsp.h"
 
 class ImpulseResponse : public History {
- public:
-  ImpulseResponse();
-  ~ImpulseResponse();
+  public:
+    ImpulseResponse();
+    ~ImpulseResponse();
 
-  void Init(std::vector<float> irData);
-  float Process(float inputs);
+    void Init(std::vector<float> irData);
+    float Process(float inputs);
 
- private:
-  // Set the weights, given that the plugin is running at the provided sample
-  // rate.
-  void _SetWeights();
+  private:
+    // Set the weights, given that the plugin is running at the provided sample
+    // rate.
+    void _SetWeights();
 
-  // State of audio
-  // Keep a copy of the raw audio that was loaded so that it can be resampled
-  std::vector<float> mRawAudio;
-  float mRawAudioSampleRate;
-  float mSampleRate;
+    // State of audio
+    // Keep a copy of the raw audio that was loaded so that it can be resampled
+    std::vector<float> mRawAudio;
+    float mRawAudioSampleRate;
+    float mSampleRate;
 
-  const size_t mMaxLength = 8192;
-  // The weights
-  Eigen::VectorXf mWeight;
+    const size_t mMaxLength = 8192;
+    // The weights
+    Eigen::VectorXf mWeight;
 };
 
 #endif
