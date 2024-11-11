@@ -65,10 +65,6 @@
     "stop_token": "cpp",
     "streambuf": "cpp",
     "thread": "cpp",
-    "typeinfo": "cpp",
-    "codecvt": "cpp",
-    "complex": "cpp",
-    "valarray": "cpp",
-    "*.tpp": "cpp"
+    "typeinfo": "cpp"
   }
 }
