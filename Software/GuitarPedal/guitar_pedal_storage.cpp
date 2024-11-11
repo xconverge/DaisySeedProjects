@@ -183,9 +183,9 @@ void LoadEffectSettingsFromPersistantStorage() {
                 ++globalEffectsSettingMemIdx;
             }
         }
-        // If we have added a new parameter since the last time settings were stored, we read values from persitent
-        // memory (but assume that a new param was added to the end) This way we preserve all other effects and don't
-        // get into a scenario where we accidentally use a large value as the number of presets.
+        // If we have added a new parameter since the last time settings were stored, we read values from persitent memory (but assume
+        // that a new param was added to the end) This way we preserve all other effects and don't get into a scenario where we
+        // accidentally use a large value as the number of presets.
         else if (prevParamCount < paramCount) {
             for (uint32_t paramID = 0; paramID < prevParamCount; paramID++) {
                 uint32_t value = settings.globalEffectsSettings[globalEffectsSettingMemIdx];
@@ -207,9 +207,9 @@ void LoadEffectSettingsFromPersistantStorage() {
                 ++globalEffectsSettingMemIdx;
             }
         }
-        // Else, if we have removed a parameter since the last time settings were stored, read all the relevant
-        // parameters, (again assume that these were correct in the first place) Then shift the effects after this one
-        // back by the appropriate amount of words
+        // Else, if we have removed a parameter since the last time settings were stored, read all the relevant parameters, (again
+        // assume that these were correct in the first place) Then shift the effects after this one back by the appropriate amount of
+        // words
         else {
             for (uint32_t paramID = 0; paramID < paramCount; paramID++) {
                 uint32_t value = settings.globalEffectsSettings[globalEffectsSettingMemIdx];

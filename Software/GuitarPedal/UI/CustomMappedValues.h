@@ -6,8 +6,8 @@
 
 namespace daisy {
 
-/** @brief An override of `MappedValue` that maps a float value using various mapping functions, but gives the end user
- * the flexibilty to change the step size.
+/** @brief An override of `MappedValue` that maps a float value using various mapping functions, but gives the end user the flexibilty
+ * to change the step size.
  *  @author jelliesen, modified by achijos
  *  @addtogroup utility
  */

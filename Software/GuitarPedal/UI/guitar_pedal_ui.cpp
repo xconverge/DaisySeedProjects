@@ -90,8 +90,8 @@ void GuitarPedalUI::UpdateActiveEffectParameterValue(int paramID, bool showChang
                 m_activeEffectSettingsMenu.SelectItem(paramID);
                 m_needToCloseActiveEffectSettingsMenu = true;
             } else {
-                // If we were already on the param menu and we didn't open it, make sure we store the param index so we
-                // can return to it
+                // If we were already on the param menu and we didn't open it, make sure we store the param index so we can return to
+                // it
                 if (m_paramIdToReturnTo == -1 && !m_needToCloseActiveEffectSettingsMenu) {
                     m_paramIdToReturnTo = m_activeEffectSettingsMenu.GetSelectedItemIdx();
                 }
@@ -355,6 +355,8 @@ void GuitarPedalUI::GenerateUIEvents() {
 
     const auto increments = hardware.encoders[0].Increment();
 
+    // Process the encoder increment for the UI ONLY if the alternate footswitch
+    // is not pressed, because that is used for quick effect switching
     if (increments != 0 &&
         !hardware.switches[hardware.GetPreferredSwitchIDForSpecialFunctionType(SpecialFunctionType::Alternate)].Pressed()) {
         m_eventQueue.AddEncoderTurned(0, increments, 12);
@@ -400,16 +402,15 @@ void GuitarPedalUI::UpdateUI(float elapsedTime) {
     }
 
     m_activePresetSelected = m_activePresetSettingIntValue.Get();
-    // Set the target preset from the menu, the ui will be the "brains" and figure out what actual preset number makes
-    // sense here, since Base Effects does not know its effect id.
+    // Set the target preset from the menu, the ui will be the "brains" and figure out what actual preset number makes sense here,
+    // since Base Effects does not know its effect id.
     if (m_activePresetSelected != activeEffect->GetCurrentPreset()) {
         uint32_t temp = activeEffect->GetPresetCount();
         if (m_activePresetSelected < temp) {
             activeEffect->SetCurrentPreset(m_activePresetSelected);
             LoadPresetFromPersistentStorage(activeEffectID, m_activePresetSelected);
         } else {
-            // Basically set 1 index higher than the actual presets, expecting the user to save the new preset in the
-            // usual way
+            // Basically set 1 index higher than the actual presets, expecting the user to save the new preset in the usual way
             m_activePresetSelected = temp;
             activeEffect->SetCurrentPreset(m_activePresetSelected);
             m_activePresetSettingIntValue.Set(m_activePresetSelected);
