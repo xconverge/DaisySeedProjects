@@ -9,8 +9,7 @@
 #define SETTINGS_ABSOLUTE_MAX_PARAM_COUNT 16000
 #define ERR_VALUE_MAX 0xffffffff
 // Save System Variables
-struct Settings
-{
+struct Settings {
     int fileFormatVersion;
     int globalActiveEffectID;
     bool globalMidiEnabled;
@@ -20,20 +19,16 @@ struct Settings
     bool globalSplitMonoInputToStereo;
     uint32_t *globalEffectsSettings; // Set aside a block of memory for individual effect params
 
-    bool operator==(const Settings &rhs)
-    {
+    bool operator==(const Settings &rhs) {
         if (fileFormatVersion != rhs.fileFormatVersion || globalActiveEffectID != rhs.globalActiveEffectID ||
             globalMidiEnabled != rhs.globalMidiEnabled || globalMidiThrough != rhs.globalMidiThrough ||
             globalMidiChannel != rhs.globalMidiChannel || globalRelayBypassEnabled != rhs.globalRelayBypassEnabled ||
-            globalSplitMonoInputToStereo != rhs.globalSplitMonoInputToStereo)
-        {
+            globalSplitMonoInputToStereo != rhs.globalSplitMonoInputToStereo) {
             return false;
         }
 
-        for (uint32_t i = 0; i < globalEffectsSettings[0]; i++)
-        {
-            if (globalEffectsSettings[i] != rhs.globalEffectsSettings[i])
-            {
+        for (uint32_t i = 0; i < globalEffectsSettings[0]; i++) {
+            if (globalEffectsSettings[i] != rhs.globalEffectsSettings[i]) {
                 return false;
             }
         }
@@ -41,10 +36,7 @@ struct Settings
         return true;
     }
 
-    bool operator!=(const Settings &rhs)
-    {
-        return !operator==(rhs);
-    }
+    bool operator!=(const Settings &rhs) { return !operator==(rhs); }
 };
 
 void InitPersistantStorage();
