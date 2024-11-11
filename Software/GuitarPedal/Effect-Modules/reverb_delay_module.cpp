@@ -4,8 +4,8 @@
 using namespace bkshepherd;
 
 static const char *s_waveBinNames[5] = {"Sine", "Triangle", "Saw", "Ramp",
-                                        "Square"}; //, "Poly Tri", "Poly Saw", "Poly Sqr"};  // Horrible loud sound when
-                                                   // switching to poly tri, not every time, TODO whats going on?
+                                        "Square"}; //, "Poly Tri", "Poly Saw", "Poly Sqr"};  // Horrible loud sound when switching to
+                                                   // poly tri, not every time, TODO whats going on?
 static const char *s_modParamNames[5] = {"None", "DelayTime", "DelayLevel", "ReverbLevel", "DelayPan"};
 static const char *s_delayModes[3] = {"Normal", "Triplett", "Dotted 8th"};
 
@@ -108,8 +108,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         knobMapping : -1,
         midiCCMapping : 32
     },
-    //{name: "Ping Pong", valueType: ParameterValueType::Bool, valueBinCount: 0, defaultValue: 0, knobMapping: -1,
-    // midiCCMapping: 33},
+    //{name: "Ping Pong", valueType: ParameterValueType::Bool, valueBinCount: 0, defaultValue: 0, knobMapping: -1, midiCCMapping: 33},
     /*12*/ {
         name : "Dual Delay",
         valueType : ParameterValueType::Bool,
@@ -325,14 +324,17 @@ void ReverbDelayModule::ProcessModulation() {
         float timeParam = GetParameterAsMagnitude(0);
         delayLeft.delayTarget = m_delaySamplesMin + (m_delaySamplesMax - m_delaySamplesMin) * timeParam + mod * mod_amount * 500;
         delayRight.delayTarget = m_delaySamplesMin + (m_delaySamplesMax - m_delaySamplesMin) * timeParam + mod * mod_amount * 500;
+
     } else if (modParam == 2) {
         float mod_level = mod * mod_amount + (1.0 - mod_amount);
         delayLeft.level = mod_level;
         delayRight.level = mod_level;
         delayLeft.level_reverse = mod_level;
         delayRight.level_reverse = mod_level;
+
     } else if (modParam == 3) {
         reverb_level = mod * mod_amount + (1.0 - mod_amount);
+
     } else if (modParam == 4) {
         float mod_level = mod * mod_amount + (1.0 - mod_amount);
         delayLeft.level = mod_level;
@@ -369,8 +371,9 @@ void ReverbDelayModule::ProcessMono(float in) {
 
         delayLeft.level_reverse = 1.0 - GetParameterAsMagnitude(11);
         delayRight.level_reverse = GetParameterAsMagnitude(11) + 1.0;
-    } else { // If dual delay is off reset the levels to normal, spread controls the amount of additional delay applied to the
-             // right channel
+
+    } else { // If dual delay is off reset the levels to normal, spread controls the amount of additional delay applied to the right
+             // channel
         delayLeft.level = 1.0;
         delayRight.level = 1.0;
         delayLeft.level_reverse = 1.0;
@@ -385,8 +388,8 @@ void ReverbDelayModule::ProcessMono(float in) {
     invertedFreq = invertedFreq * invertedFreq; // also square it for exponential taper (more control over lower frequencies)
     m_reverbStereo.SetLpFreq(m_lpFreqMin + invertedFreq * (m_lpFreqMax - m_lpFreqMin));
 
-    // Modulation, this overwrites any previous parameter settings for the modulated param - TODO Better way to do this
-    // for less processing?
+    // Modulation, this overwrites any previous parameter settings for the modulated param - TODO Better way to do this for less
+    // processing?
     ProcessModulation();
 
     float delLeft_out = delayLeft.Process(m_audioLeft);
@@ -458,8 +461,9 @@ void ReverbDelayModule::ProcessStereo(float inL, float inR) {
 
         delayLeft.level_reverse = 1.0 - GetParameterAsMagnitude(11);
         delayRight.level_reverse = GetParameterAsMagnitude(11) + 1.0;
-    } else { // If dual delay is off reset the levels to normal, spread controls the amount of additional delay applied to the
-             // right channel
+
+    } else { // If dual delay is off reset the levels to normal, spread controls the amount of additional delay applied to the right
+             // channel
         delayLeft.level = 1.0;
         delayRight.level = 1.0;
         delayLeft.level_reverse = 1.0;
@@ -511,8 +515,7 @@ void ReverbDelayModule::ProcessStereo(float inL, float inR) {
     }
 }
 
-// Set the delay time from the tap tempo  TODO: Currently the tap tempo led isn't set to delay time on pedal boot up,
-// how to do this?
+// Set the delay time from the tap tempo  TODO: Currently the tap tempo led isn't set to delay time on pedal boot up, how to do this?
 void ReverbDelayModule::SetTempo(uint32_t bpm) {
     float freq = tempo_to_freq(bpm);
     float delay_in_samples = effect_samplerate / freq;

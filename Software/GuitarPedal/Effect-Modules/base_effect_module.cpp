@@ -44,6 +44,7 @@ void BaseEffectModule::InitParams(int count) {
                 } else {
                     m_params[i] = m_paramMetaData[i].defaultValue;
                 }
+
             } else {
                 m_params[i] = 0;
             }

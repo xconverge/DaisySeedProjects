@@ -39,8 +39,7 @@ class Chopper {
 
     /** Initializes the Chopper
 
-        \param sample_rate - sample rate of the audio engine being run, and the frequency that the Process function will
-       be called.
+        \param sample_rate - sample rate of the audio engine being run, and the frequency that the Process function will be called.
 
         Defaults:
         - freq_ = 100 Hz
