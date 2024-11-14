@@ -33,8 +33,6 @@ class LooperModule : public BaseEffectModule {
 
     daisysp_modified::Looper m_looper;
 
-    float m_inputLevelMin;
-    float m_inputLevelMax;
     float m_loopLevelMin;
     float m_loopLevelMax;
 };
