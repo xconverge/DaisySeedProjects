@@ -14,11 +14,19 @@ static const char *s_loopModeNames[4] = {"Normal", "One-time", "Replace", "Fripp
 static const int s_paramCount = 3;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
-        name : "Loop Level",
-        valueType : ParameterValueType::FloatMagnitude,
+        name : "Input Level",
+        valueType : ParameterValueType::Float,
         valueBinCount : 0,
-        defaultValue : 64,
+        defaultValue : {.float_value = 0.5f},
         knobMapping : 0,
+        midiCCMapping : -1
+    },
+    {
+        name : "Loop Level",
+        valueType : ParameterValueType::Float,
+        valueBinCount : 0,
+        defaultValue : {.float_value = 0.5f},
+        knobMapping : 1,
         midiCCMapping : -1
     },
     {
@@ -26,14 +34,15 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         valueType : ParameterValueType::Binned,
         valueBinCount : 4,
         valueBinNames : s_loopModeNames,
-        defaultValue : 0,
-        knobMapping : 1,
+        defaultValue : {.uint_value = 0},
+        knobMapping : 2,
         midiCCMapping : -1
     },
 };
 
 // Default Constructor
-LooperModule::LooperModule() : BaseEffectModule(), m_loopLevelMin(0.0f), m_loopLevelMax(1.0f) {
+LooperModule::LooperModule()
+    : BaseEffectModule(), m_inputLevelMin(0.0f), m_inputLevelMax(1.0f), m_loopLevelMin(0.0f), m_loopLevelMax(1.0f) {
     // Set the name of the effect
     m_name = "Looper";
 
@@ -59,12 +68,12 @@ void LooperModule::Init(float sample_rate) {
 }
 
 void LooperModule::SetLooperMode() {
-    const int modeIndex = GetParameterAsBinnedValue(1) - 1;
+    const int modeIndex = GetParameterAsBinnedValue(2) - 1;
     m_looper.SetMode(static_cast<daisysp_modified::Looper::Mode>(modeIndex));
 }
 
 void LooperModule::ParameterChanged(int parameter_id) {
-    if (parameter_id == 1) {
+    if (parameter_id == 2) {
         SetLooperMode();
     }
 }
@@ -77,10 +86,16 @@ void LooperModule::AlternateFootswitchHeldFor1Second() {
 }
 
 void LooperModule::ProcessMono(float in) {
-    const float loopLevel = m_loopLevelMin + (GetParameterAsMagnitude(0) * (m_loopLevelMax - m_loopLevelMin));
+    BaseEffectModule::ProcessMono(in);
 
-    // store signal = loop signal * loop gain + in
-    const float looperOutput = m_looper.Process(in) * loopLevel + in;
+    const float inputLevel = m_inputLevelMin + (GetParameterAsFloat(0) * (m_inputLevelMax - m_inputLevelMin));
+
+    const float loopLevel = m_loopLevelMin + (GetParameterAsFloat(1) * (m_loopLevelMax - m_loopLevelMin));
+
+    float input = in * inputLevel;
+
+    // store signal = loop signal * loop gain + in * in_gain
+    float looperOutput = m_looper.Process(input) * loopLevel + input;
 
     m_audioRight = m_audioLeft = looperOutput;
 }
@@ -90,7 +105,7 @@ void LooperModule::ProcessStereo(float inL, float inR) {
     ProcessMono(inL);
 }
 
-float LooperModule::GetBrightnessForLED(int led_id) {
+float LooperModule::GetBrightnessForLED(int led_id) const {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
     if (led_id == 1) {

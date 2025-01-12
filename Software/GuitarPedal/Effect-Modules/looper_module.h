@@ -21,7 +21,7 @@ class LooperModule : public BaseEffectModule {
     void ParameterChanged(int parameter_id) override;
     void ProcessMono(float in) override;
     void ProcessStereo(float inL, float inR) override;
-    float GetBrightnessForLED(int led_id) override;
+    float GetBrightnessForLED(int led_id) const override;
     bool AlternateFootswitchForTempo() const override { return false; }
     void AlternateFootswitchPressed() override;
     void AlternateFootswitchHeldFor1Second() override;
@@ -33,6 +33,8 @@ class LooperModule : public BaseEffectModule {
 
     daisysp_modified::Looper m_looper;
 
+    float m_inputLevelMin;
+    float m_inputLevelMax;
     float m_loopLevelMin;
     float m_loopLevelMax;
 };

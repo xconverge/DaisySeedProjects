@@ -25,25 +25,25 @@ static const int s_paramCount = 7;
 static const ParameterMetaData s_metaData[s_paramCount] = {
     {
         name : "Level",
-        valueType : ParameterValueType::FloatMagnitude,
+        valueType : ParameterValueType::Float,
         valueBinCount : 0,
-        defaultValue : 64,
+        defaultValue : {.float_value = 0.5f},
         knobMapping : 0,
         midiCCMapping : -1
     },
     {
         name : "Cutoff",
-        valueType : ParameterValueType::FloatMagnitude,
+        valueType : ParameterValueType::Float,
         valueBinCount : 0,
-        defaultValue : 64,
+        defaultValue : {.float_value = 0.5f},
         knobMapping : 1,
         midiCCMapping : -1
     },
     {
         name : "Gain",
-        valueType : ParameterValueType::FloatMagnitude,
+        valueType : ParameterValueType::Float,
         valueBinCount : 0,
-        defaultValue : 64,
+        defaultValue : {.float_value = 0.5f},
         knobMapping : 2,
         midiCCMapping : -1
     },
@@ -52,7 +52,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         valueType : ParameterValueType::Binned,
         valueBinCount : 8,
         valueBinNames : s_modelBinNames,
-        defaultValue : (127 / 8) * 4,
+        defaultValue : {.uint_value = 0},
         knobMapping : 3,
         midiCCMapping : -1
     },
@@ -61,12 +61,18 @@ static const ParameterMetaData s_metaData[s_paramCount] = {
         valueType : ParameterValueType::Binned,
         valueBinCount : 10,
         valueBinNames : s_IRBinNames,
-        defaultValue : (127 / 10) * 7,
+        defaultValue : {.uint_value = 0},
         knobMapping : 4,
         midiCCMapping : -1
     },
-    {name : "IR Enabled", valueType : ParameterValueType::Bool, defaultValue : 0, knobMapping : 5, midiCCMapping : -1},
-    {name : "Amp Enabled", valueType : ParameterValueType::Bool, defaultValue : 127, knobMapping : -1, midiCCMapping : -1},
+    {name : "IR Enabled", valueType : ParameterValueType::Bool, defaultValue : {.uint_value = 0}, knobMapping : 5, midiCCMapping : -1},
+    {
+        name : "Amp Enabled",
+        valueType : ParameterValueType::Bool,
+        defaultValue : {.uint_value = 0},
+        knobMapping : -1,
+        midiCCMapping : -1
+    },
 };
 
 // Neural Network Model
@@ -160,7 +166,7 @@ void NeuralAmpIRModule::SelectIR() {
 
 void NeuralAmpIRModule::CalculateTone() {
     // Set low pass filter as exponential taper
-    const float cutoff = m_cutoffMin + GetParameterAsMagnitude(1) * GetParameterAsMagnitude(1) * (m_cutoffMax - m_cutoffMin);
+    const float cutoff = m_cutoffMin + GetParameterAsFloat(1) * GetParameterAsFloat(1) * (m_cutoffMax - m_cutoffMin);
     m_tone.SetFreq(cutoff);
 }
 
@@ -171,7 +177,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
     float input_arr[1] = {0.0};
 
     // Apply gain
-    const float gain = m_gainMin + (GetParameterAsMagnitude(2) * (m_gainMax - m_gainMin));
+    const float gain = m_gainMin + (GetParameterAsFloat(2) * (m_gainMax - m_gainMin));
     input_arr[0] = in * gain;
 
     // Process Neural Net Model
@@ -198,7 +204,7 @@ void NeuralAmpIRModule::ProcessMono(float in) {
         impulse_out = filter_out;
     }
 
-    float level = m_levelMin + (GetParameterAsMagnitude(0) * (m_levelMax - m_levelMin));
+    float level = m_levelMin + (GetParameterAsFloat(0) * (m_levelMax - m_levelMin));
 
     m_audioLeft = impulse_out * level;
     m_audioRight = m_audioLeft;
@@ -214,11 +220,11 @@ void NeuralAmpIRModule::ProcessStereo(float inL, float inR) {
     //       input is ignored in this effect module.
 }
 
-float NeuralAmpIRModule::GetBrightnessForLED(int led_id) {
+float NeuralAmpIRModule::GetBrightnessForLED(int led_id) const {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
     if (led_id == 1) {
-        return value * GetParameterAsMagnitude(0);
+        return value * GetParameterAsFloat(0);
     }
 
     return value;

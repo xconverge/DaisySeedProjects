@@ -58,7 +58,6 @@ class Metronome {
 };
 
 enum TimeSignature { meter4x4 = 0, meter3x4 = 1, meter2x4 = 2 };
-const uint16_t DefaultTempoBpm = 120;
 
 class MetroModule : public BaseEffectModule {
   public:
@@ -72,7 +71,7 @@ class MetroModule : public BaseEffectModule {
 
     void ParameterChanged(int parameter_id) override;
     void SetTempo(uint32_t bpm) override;
-    float GetBrightnessForLED(int led_id) override;
+    float GetBrightnessForLED(int led_id) const override;
     void DrawUI(OneBitGraphicsDisplay &display, int currentIndex, int numItemsTotal, Rectangle boundsToDrawIn,
                 bool isEditing) override;
 

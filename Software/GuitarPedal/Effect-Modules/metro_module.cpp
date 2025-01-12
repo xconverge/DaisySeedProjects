@@ -53,17 +53,19 @@ constexpr uint32_t maxTempo = 250;
 static const int s_paramCount = 3;
 static const ParameterMetaData s_metaData[s_paramCount] = {{
                                                                name : "Tempo",
-                                                               valueType : ParameterValueType::FloatMagnitude,
+                                                               valueType : ParameterValueType::Float,
                                                                valueBinCount : 0,
-                                                               defaultValue : 63,
+                                                               defaultValue : {.float_value = 165.f},
                                                                knobMapping : 0,
-                                                               midiCCMapping : 23
+                                                               midiCCMapping : 23,
+                                                               minValue : minTempo,
+                                                               maxValue : maxTempo
                                                            },
                                                            {
                                                                name : "Mix",
-                                                               valueType : ParameterValueType::FloatMagnitude,
+                                                               valueType : ParameterValueType::Float,
                                                                valueBinCount : 0,
-                                                               defaultValue : 10,
+                                                               defaultValue : {.float_value = 0.08f},
                                                                knobMapping : 1,
                                                                midiCCMapping : 21
                                                            },
@@ -72,7 +74,7 @@ static const ParameterMetaData s_metaData[s_paramCount] = {{
                                                                valueType : ParameterValueType::Binned,
                                                                valueBinCount : 3,
                                                                valueBinNames : TimeSignatureLabels,
-                                                               defaultValue : 0,
+                                                               defaultValue : {.uint_value = 0},
                                                                knobMapping : 2,
                                                                midiCCMapping : -1
                                                            }};
@@ -115,13 +117,14 @@ void MetroModule::Init(float sample_rate) {
     m_env.SetSustainLevel(.5);
 
     // Set metronome
-    const float freq = tempo_to_freq(DefaultTempoBpm);
+    m_bpm = static_cast<uint32_t>(GetParameterAsFloat(0));
+    const float freq = tempo_to_freq(m_bpm);
     m_metro.Init(freq, sample_rate);
 }
 
 void MetroModule::ParameterChanged(int parameter_id) {
     if (parameter_id == 0) {
-        m_bpm = minTempo + GetParameterAsMagnitude(0) * static_cast<float>(maxTempo - minTempo);
+        m_bpm = static_cast<uint32_t>(GetParameterAsFloat(0));
     }
 }
 
@@ -152,7 +155,7 @@ void MetroModule::ProcessMono(float in) {
     BaseEffectModule::ProcessMono(in);
     float sig = Process();
     // Adjust the level
-    float level = (m_levelMin + (GetParameterAsMagnitude(1) * (m_levelMax - m_levelMin)));
+    float level = (m_levelMin + (GetParameterAsFloat(1) * (m_levelMax - m_levelMin)));
     m_audioLeft = sig * level + in * (1.0f - level);
     m_audioRight = m_audioLeft;
 }
@@ -161,14 +164,14 @@ void MetroModule::ProcessStereo(float inL, float inR) {
     BaseEffectModule::ProcessStereo(inL, inR);
     float sig = Process();
     // Adjust the level
-    float level = (m_levelMin + (GetParameterAsMagnitude(1) * (m_levelMax - m_levelMin)));
+    float level = (m_levelMin + (GetParameterAsFloat(1) * (m_levelMax - m_levelMin)));
     m_audioLeft = sig * level + inL * (1.0f - level);
     m_audioRight = sig * level + inR * (1.0f - level);
 }
 
 void MetroModule::SetTempo(uint32_t bpm) { m_bpm = std::clamp(bpm, minTempo, maxTempo); }
 
-float MetroModule::GetBrightnessForLED(int led_id) {
+float MetroModule::GetBrightnessForLED(int led_id) const {
     float value = BaseEffectModule::GetBrightnessForLED(led_id);
 
     if (led_id == 1) {
